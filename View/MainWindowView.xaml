@@ -1,0 +1,87 @@
+﻿<Window x:Class="View.MainWindowView"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:View"
+        xmlns:viewModel="clr-namespace:ViewModel;assembly=ViewModel"
+        xmlns:Extensions="clr-namespace:MarkupExtensions;assembly=MarkupExtensions"
+        xmlns:Model="clr-namespace:Model;assembly=Model"
+        d:DataContext="{d:DesignInstance viewModel:MainWindowViewModel}"
+        mc:Ignorable="d"
+        Title="MainWindowView" Height="350" Width="525">
+    <Grid>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition></ColumnDefinition>
+            <ColumnDefinition></ColumnDefinition>
+        </Grid.ColumnDefinitions>
+        
+        <DockPanel
+            Grid.Row="0" Grid.Column="0"
+             >
+            <!-- Временный листбокс для задач -->
+            <ListBox x:Name="ListBox1"
+                DockPanel.Dock="Top"
+                Margin="10"
+                Height="NaN"
+                   
+                ItemsSource="{Binding UserTasks}"
+                SelectedItem="{Binding SelectedTask}"
+                DisplayMemberPath="Name"
+                />
+
+            <!-- Групбокс Действия -->
+            <GroupBox x:Name="GroupBoxActions"
+                      Header="Действия"
+                      DockPanel.Dock="Bottom"
+                      Height="auto" VerticalAlignment="Bottom"
+                      >
+                <StackPanel
+                    VerticalAlignment="Bottom">
+                    <CheckBox x:Name="CheckBoxShowCompleted"
+                              Content="Показать Завершенные"
+                              />
+                    <CheckBox x:Name="CheckBoxShowCanceled"
+                              Content="Показать Отменённые"
+                              />
+                    
+                    <Button x:Name="ButtonAddGroup"
+                            Content="Добавить Группу"
+                            />                    
+                    <Button x:Name="ButtonAddTask"
+                            Content="Добавить Задачу"
+                            />
+                    
+                </StackPanel>
+            </GroupBox>
+
+        </DockPanel>
+
+        <!-- Групбокс Выбранная задача -->
+        <GroupBox x:Name="GroupBoxSelectedTask"
+            Header="Выбранная задача"
+            Grid.Row="0" Grid.Column="1">
+            
+            <StackPanel
+                >
+                <TextBlock Text="Название задачи"/>
+                <TextBox Text="{Binding SelectedTask.Name}"/>
+                <TextBlock Text="Описание задачи"/>
+                <TextBox
+                    Text="{Binding SelectedTask.Description}"
+                    AcceptsReturn="True"
+                    TextWrapping="Wrap"
+                    />
+                <TextBlock Text="Статус"/>
+                <ComboBox
+                    ItemsSource="{Extensions:EnumValuesExtension Model:TaskStatus}"
+                    SelectedValue="{Binding SelectedTask.Status}"
+                   />
+                
+                <TextBlock Text="Планируемая дата завершения"/>
+                <DatePicker SelectedDate="{Binding  SelectedTask.DueDate}"/>
+            </StackPanel>
+        </GroupBox>
+        
+    </Grid>
+</Window>
