@@ -7,7 +7,7 @@ namespace Model
         public string Name { get; set; }
         public string Description { get; set; }
         public DateTime DueDate { get; set; } 
-        public TaskStatus Status { get; set; }
+        public Model.TaskStatus Status { get; set; }
         public string Group { get; set; }  
     }
 }

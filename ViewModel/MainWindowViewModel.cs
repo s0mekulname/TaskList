@@ -47,7 +47,7 @@ namespace ViewModel
                 },
                 new UserTask
                 {
-                    Name = " Canceled Task 6",
+                    Name = "Canceled Task 6",
                     Description = "Description 1",
                     DueDate = Convert.ToDateTime("2017-03-30"),
                     Status = TaskStatus.Canceled,

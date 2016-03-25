@@ -1,10 +1,12 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Windows.Markup;
 
 namespace MarkupExtensions
 {
     public class EnumValuesExtension : MarkupExtension
     {
+
         public EnumValuesExtension()
         {
             
@@ -23,7 +25,16 @@ namespace MarkupExtensions
             {
                 throw new ArgumentException("The enumeration's type is not set.");
             }
-            return Enum.GetValues(EnumType);
+
+            var eValues = Enum.GetValues(EnumType);
+            var enumValueDescriptions = new List<EnumValueDescription>();
+            foreach (Model.TaskStatus v in eValues)
+            {
+                enumValueDescriptions.Add(new EnumValueDescription(v));
+            }
+            return enumValueDescriptions;
         }
+
+
     }
 }

@@ -30,6 +30,16 @@
                 DisplayMemberPath="Name"
                 />
 
+            <TreeView x:Name="TreeViewTasks"
+                      DockPanel.Dock="Top"
+                      Margin ="5"
+                      ItemsSource="{Binding UserTasks}"
+                      DisplayMemberPath="Name">
+
+          
+                
+                
+            </TreeView>
             <!-- Групбокс Действия -->
             <GroupBox x:Name="GroupBoxActions"
                       Header="Действия"
@@ -74,7 +84,8 @@
                     />
                 <TextBlock Text="Статус"/>
                 <ComboBox
-                    ItemsSource="{Extensions:EnumValuesExtension Model:TaskStatus}"
+                    ItemsSource="{Extensions:EnumValuesExtension {x:Type Model:TaskStatus}}"
+                    SelectedValuePath="EnumValue" DisplayMemberPath="DisplayString" 
                     SelectedValue="{Binding SelectedTask.Status}"
                    />
                 
