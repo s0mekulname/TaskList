@@ -12,6 +12,12 @@ namespace View
         {
             InitializeComponent();
             DataContext = new MainWindowViewModel();
+            TreeViewTasks.ItemsSource = ((MainWindowViewModel) DataContext).UserTasks;
+        }
+
+        private void ButtonAddGroup_Click(object sender, RoutedEventArgs e)
+        {
+
         }
     }
 }

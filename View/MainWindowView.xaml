@@ -30,16 +30,27 @@
                 DisplayMemberPath="Name"
                 />
 
-            <TreeView x:Name="TreeViewTasks"
+            <!--<TreeView x:Name="TreeViewTasks"
                       DockPanel.Dock="Top"
                       Margin ="5"
-                      ItemsSource="{Binding UserTasks}"
+                      ItemsSource="{Binding UserTasks}"                      
                       DisplayMemberPath="Name">
+            </TreeView>-->
+            
+            <TreeView x:Name="TreeViewTasks"
+                      DockPanel.Dock="Top"
+                      Margin ="5"                     
+                      >
+                <TreeView.ItemTemplate>
+                    <HierarchicalDataTemplate 
 
-          
+                        ItemsSource="{Binding Path=UserTasks}"
+                        >
+                        <TextBlock Text="{Binding Path=Name}"/>
+                    </HierarchicalDataTemplate>
+                </TreeView.ItemTemplate>
+            </TreeView>            
                 
-                
-            </TreeView>
             <!-- Групбокс Действия -->
             <GroupBox x:Name="GroupBoxActions"
                       Header="Действия"
@@ -56,7 +67,7 @@
                               />
                     
                     <Button x:Name="ButtonAddGroup"
-                            Content="Добавить Группу"
+                            Content="Добавить Группу" Click="ButtonAddGroup_Click"
                             />                    
                     <Button x:Name="ButtonAddTask"
                             Content="Добавить Задачу"
