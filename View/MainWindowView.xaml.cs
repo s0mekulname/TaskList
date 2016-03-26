@@ -25,12 +25,16 @@ namespace View
 
         private void TreeViewTasks_OnSelectedItemChanged(object sender, RoutedPropertyChangedEventArgs<object> e)
         {
-            var task = e.NewValue as UserTask;
-            if (task != null)
+            var value = e.NewValue;
+            if (value is UserTask)
             {
-               ViewModel.SelectedTask = task;
-               
+                ViewModel.SelectedTask = (UserTask)value;
             }
+            else if (value is UserTasksCollection)
+            {
+                ViewModel.SelectedUserTasksCollection = (UserTasksCollection)value;
+            }
+
         }
     }
 }

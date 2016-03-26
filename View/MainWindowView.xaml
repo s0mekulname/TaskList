@@ -10,6 +10,9 @@
         d:DataContext="{d:DesignInstance viewModel:MainWindowViewModel}"
         mc:Ignorable="d"
         Title="MainWindowView" Height="350" Width="525">
+    <Window.Resources>
+        <BooleanToVisibilityConverter x:Key="Bool2Vis"/>
+    </Window.Resources>
     <Grid>
         <Grid.ColumnDefinitions>
             <ColumnDefinition></ColumnDefinition>
@@ -88,7 +91,9 @@
         <!-- Групбокс Выбранная задача -->
         <GroupBox x:Name="GroupBoxSelectedTask"
             Header="Выбранная задача"
-            Grid.Row="0" Grid.Column="1">
+            Grid.Row="0" Grid.Column="1"
+            Visibility="{Binding IsUserTaskSelected, Converter={StaticResource Bool2Vis}}"   
+                  >
             
             <StackPanel
                 >
