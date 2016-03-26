@@ -1,7 +1,10 @@
 ﻿using System;
 using System.Collections;
 using System.Collections.ObjectModel;
+using System.ComponentModel;
+using System.Runtime.CompilerServices;
 using Model;
+using ViewModel.Annotations;
 using TaskStatus = Model.TaskStatus;
 
 namespace ViewModel
@@ -12,8 +15,9 @@ namespace ViewModel
         public string GroupName { get; set; }
     }
 
-    public class MainWindowViewModel
+    public class MainWindowViewModel : INotifyPropertyChanged
     {
+        private UserTask _selectedTask;
         // Истинная коллекция всех задач
         //public ObservableCollection <UserTask> UserTasks { get; set; }
         public UserTasksCollection UserTasks { get; set; }
@@ -155,6 +159,22 @@ namespace ViewModel
             };
         }
 
-        public UserTask SelectedTask { get; set; }
+        public UserTask SelectedTask
+        {
+            get { return _selectedTask; }
+            set
+            {
+                _selectedTask = value; 
+                OnPropertyChanged(nameof(SelectedTask));
+            }
+        }
+
+        public event PropertyChangedEventHandler PropertyChanged;
+
+        [NotifyPropertyChangedInvocator]
+        protected virtual void OnPropertyChanged([CallerMemberName] string propertyName = null)
+        {
+            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
+        }
     }
 }

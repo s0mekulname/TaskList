@@ -20,7 +20,7 @@
             Grid.Row="0" Grid.Column="0"
              >
             <!-- Временный листбокс для задач -->
-            <ListBox x:Name="ListBox1"
+            <!--<ListBox x:Name="ListBox1"
                 DockPanel.Dock="Top"
                 Margin="10"
                 Height="NaN"
@@ -28,25 +28,32 @@
                 ItemsSource="{Binding UserTasks}"
                 SelectedItem="{Binding SelectedTask}"
                 DisplayMemberPath="Name"
-                />
+                />-->
 
-            <!--<TreeView x:Name="TreeViewTasks"
-                      DockPanel.Dock="Top"
-                      Margin ="5"
-                      ItemsSource="{Binding UserTasks}"                      
-                      DisplayMemberPath="Name">
-            </TreeView>-->
             
             <TreeView x:Name="TreeViewTasks"
                       DockPanel.Dock="Top"
-                      Margin ="5"                     
+                      Margin ="5" 
+                      
+                      ItemsSource="{Binding Path=SuperCollectionTasks}"
+                      SelectedItemChanged="TreeViewTasks_OnSelectedItemChanged"
+                      
                       >
                 <TreeView.ItemTemplate>
                     <HierarchicalDataTemplate 
-
-                        ItemsSource="{Binding Path=UserTasks}"
+                        DataType="{x:Type Model:UserTask}"
+                        ItemsSource="{Binding }"
+                        
                         >
-                        <TextBlock Text="{Binding Path=Name}"/>
+                        
+                        <TextBlock Text="{Binding Path=GroupName}"/>
+                        
+                        <HierarchicalDataTemplate.ItemTemplate>
+                            <DataTemplate>
+                                <TextBlock Text="{Binding  Path=Name}"/>
+                            </DataTemplate>
+                        </HierarchicalDataTemplate.ItemTemplate>
+                       
                     </HierarchicalDataTemplate>
                 </TreeView.ItemTemplate>
             </TreeView>            

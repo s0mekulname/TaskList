@@ -1,4 +1,5 @@
 ﻿using System.Windows;
+using Model;
 using ViewModel;
 
 namespace View
@@ -8,16 +9,28 @@ namespace View
     /// </summary>
     public partial class MainWindowView : Window
     {
+        public MainWindowViewModel ViewModel { get; set; }
         public MainWindowView()
         {
             InitializeComponent();
-            DataContext = new MainWindowViewModel();
-            TreeViewTasks.ItemsSource = ((MainWindowViewModel) DataContext).UserTasks;
+            ViewModel = new MainWindowViewModel();
+            DataContext = ViewModel;
+            TreeViewTasks.ItemsSource = ViewModel.SuperCollectionTasks;
         }
 
         private void ButtonAddGroup_Click(object sender, RoutedEventArgs e)
         {
 
+        }
+
+        private void TreeViewTasks_OnSelectedItemChanged(object sender, RoutedPropertyChangedEventArgs<object> e)
+        {
+            var task = e.NewValue as UserTask;
+            if (task != null)
+            {
+               ViewModel.SelectedTask = task;
+               
+            }
         }
     }
 }
