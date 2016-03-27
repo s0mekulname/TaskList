@@ -5,46 +5,38 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:View"
         xmlns:viewModel="clr-namespace:ViewModel;assembly=ViewModel"
-        xmlns:Extensions="clr-namespace:MarkupExtensions;assembly=MarkupExtensions"
-        xmlns:Model="clr-namespace:Model;assembly=Model"
+        xmlns:extensions="clr-namespace:MarkupExtensions;assembly=MarkupExtensions"
+        xmlns:valueConverters="clr-namespace:ValueConverters;assembly=ValueConverters"
+        xmlns:model="clr-namespace:Model;assembly=Model"
         d:DataContext="{d:DesignInstance viewModel:MainWindowViewModel}"
         mc:Ignorable="d"
-        Title="MainWindowView" Height="350" Width="525">
+        Title="{Binding WorkingMode,Converter={StaticResource Enum2Descr}}" Height="350" Width="525">
     <Window.Resources>
         <BooleanToVisibilityConverter x:Key="Bool2Vis"/>
+        
     </Window.Resources>
     <Grid>
         <Grid.ColumnDefinitions>
             <ColumnDefinition></ColumnDefinition>
             <ColumnDefinition></ColumnDefinition>
         </Grid.ColumnDefinitions>
-        
+
         <DockPanel
             Grid.Row="0" Grid.Column="0"
              >
-            <!-- Временный листбокс для задач -->
-            <!--<ListBox x:Name="ListBox1"
-                DockPanel.Dock="Top"
-                Margin="10"
-                Height="NaN"
-                   
-                ItemsSource="{Binding UserTasks}"
-                SelectedItem="{Binding SelectedTask}"
-                DisplayMemberPath="Name"
-                />-->
 
-            
+
             <TreeView x:Name="TreeViewTasks"
                       DockPanel.Dock="Top"
                       Margin ="5" 
                       
                       ItemsSource="{Binding Path=SuperCollectionTasks}"
                       SelectedItemChanged="TreeViewTasks_OnSelectedItemChanged"
-                      
+                      IsEnabled="{Binding IsNotInEditingOrCreating}"
                       >
                 <TreeView.ItemTemplate>
                     <HierarchicalDataTemplate 
-                        DataType="{x:Type Model:UserTask}"
+                        DataType="{x:Type model:UserTask}"
                         ItemsSource="{Binding }"
                         
                         >
@@ -66,6 +58,7 @@
                       Header="Действия"
                       DockPanel.Dock="Bottom"
                       Height="auto" VerticalAlignment="Bottom"
+                      IsEnabled="{Binding IsNotInEditingOrCreating}"
                       >
                 <StackPanel
                     VerticalAlignment="Bottom">
@@ -93,29 +86,106 @@
             Header="Выбранная задача"
             Grid.Row="0" Grid.Column="1"
             Visibility="{Binding IsUserTaskSelected, Converter={StaticResource Bool2Vis}}"   
+                  
                   >
             
             <StackPanel
+               
                 >
                 <TextBlock Text="Название задачи"/>
-                <TextBox Text="{Binding SelectedTask.Name}"/>
+                <TextBox Text="{Binding SelectedTask.Name,Mode=OneWay}"/>
                 <TextBlock Text="Описание задачи"/>
                 <TextBox
-                    Text="{Binding SelectedTask.Description}"
+                    Text="{Binding SelectedTask.Description,Mode=OneWay}"
                     AcceptsReturn="True"
                     TextWrapping="Wrap"
                     />
                 <TextBlock Text="Статус"/>
                 <ComboBox
-                    ItemsSource="{Extensions:EnumValuesExtension {x:Type Model:TaskStatus}}"
+                    ItemsSource="{extensions:EnumValuesExtension {x:Type model:TaskStatus}}"
                     SelectedValuePath="EnumValue" DisplayMemberPath="DisplayString" 
-                    SelectedValue="{Binding SelectedTask.Status}"
+                    SelectedValue="{Binding SelectedTask.Status,Mode=OneWay}"
                    />
                 
                 <TextBlock Text="Планируемая дата завершения"/>
-                <DatePicker SelectedDate="{Binding  SelectedTask.DueDate}"/>
+                <DatePicker SelectedDate="{Binding  SelectedTask.DueDate,Mode=OneWay}"/>
+
+                <!-- Стек-панель с кнопками "редактировать, сохранить, отмена" -->
+                <StackPanel x:Name="StackPanelEditNewTask"
+                    Orientation="Vertical">
+                    <Button Content="Редактировать"/>
+                    <StackPanel
+                        Orientation="Horizontal">
+                        <Button Content="Сохранить"/>
+                        <Button Content="Отменить"/>
+                    </StackPanel>
+                    
+                </StackPanel>
+                
             </StackPanel>
+            
+            
         </GroupBox>
-        
+
+        <!-- Групбокс Выбранная группа -->
+        <GroupBox x:Name="GroupBoxSelectedGroup"
+            Header="Выбранная задача"
+            Grid.Row="0" Grid.Column="1"
+            Visibility="{Binding IsUserTasksCollectionSelected, Converter={StaticResource Bool2Vis}}"   
+                  
+                  >
+
+            <StackPanel
+               
+                >
+                <TextBlock Text="Название Группы"/>
+                <TextBox Text="{Binding SelectedUserTasksCollection.GroupName,Mode=TwoWay}"
+                         IsEnabled="{Binding IsInModeGroupEditOrCreate}"/>
+                
+                <!-- Стек-панель с кнопками "редактировать, сохранить, отмена" для новой группы -->
+                <StackPanel x:Name="StackPanelGroupGreate"
+                    Orientation="Vertical"
+                    Visibility="{Binding IsInModeGroupGreate, Converter={StaticResource Bool2Vis}}">
+                    <Button Content="Редактировать"
+                            IsEnabled="False"
+                            />
+                    <StackPanel               
+                        Orientation="Horizontal">
+                        <Button x:Name="ButtoGroupCreationSave"
+                            Content="Сохранить"/>
+                        <Button x:Name="ButtonGroupCreationCancel"
+                            Content="Отменить"/>
+                    </StackPanel>
+
+                </StackPanel>
+                
+                <!-- Стек-панель с кнопками "редактировать, сохранить, отмена" для 
+                редактирования существующей группы -->
+                <StackPanel x:Name="StackPanelEditGroup"
+                    Orientation="Vertical"
+                    Visibility="{Binding IsInModeGroupViewOrEdit, Converter={StaticResource Bool2Vis}}">
+                    <Button x:Name="ButtonGroupEdit"
+                            Content="Редактировать"
+                            Command="{Binding RelayCommandGroupEdit}"                            
+                            />
+                    
+                    <StackPanel
+                        Orientation="Horizontal"
+                        />
+                        <Button x:Name="ButtonGroupEditSave"
+                                Content="Сохранить"
+                                Command="{Binding RelayCommandGroupEditSave}"                                                     
+                               />                          
+                        <Button x:Name="ButtonGroupEditingCancel"
+                                Content="Отменить"
+                                Command="{Binding RelayCommandGroupEditCancel}"
+                                />
+                    </StackPanel>
+
+                </StackPanel>
+            
+
+
+        </GroupBox>
     </Grid>
 </Window>

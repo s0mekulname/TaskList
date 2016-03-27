@@ -2,8 +2,9 @@
              xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:local="clr-namespace:View"
+             xmlns:valueConverters="clr-namespace:ValueConverters;assembly=ValueConverters"
              StartupUri="MainWindowView.xaml">
     <Application.Resources>
-         
+        <valueConverters:EnumDescriptionConverter x:Key="Enum2Descr"/>
     </Application.Resources>
 </Application>

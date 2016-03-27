@@ -10,9 +10,27 @@ using TaskStatus = Model.TaskStatus;
 namespace ViewModel
 {
 
-    public class UserTasksCollection : ObservableCollection<UserTask>
+    public class UserTasksCollection : ObservableCollection<UserTask>, INotifyPropertyChanged
     {
-        public string GroupName { get; set; }
+        private string _groupName;
+
+        public string GroupName
+        {
+            get { return _groupName; }
+            set
+            {
+                _groupName = value; 
+                OnPropertyChanged(nameof(GroupName));
+            }
+        }
+
+        protected override event PropertyChangedEventHandler PropertyChanged;
+
+        [NotifyPropertyChangedInvocator]
+        protected virtual void OnPropertyChanged([CallerMemberName] string propertyName = null)
+        {
+            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
+        }
     }
 
     public class MainWindowViewModel : INotifyPropertyChanged
@@ -21,12 +39,7 @@ namespace ViewModel
         private UserTasksCollection _selectedUserTasksCollection;
         private bool _isUserTaskSelected;
         private bool _isUserTasksCollectionSelected;
-        private bool _isInProgressUserTaskCreate;
-        private bool _isInProgressUserTasksCollectionCreate;
         private WorkingMode _workingMode;
-        //private bool _isWorkingWithSelectedTask;
-        // Истинная коллекция всех задач
-        //public ObservableCollection <UserTask> UserTasks { get; set; }
         public UserTasksCollection UserTasks { get; set; }
 
         public UserTasksCollection ExpiredTasks { get; set; }
@@ -40,7 +53,7 @@ namespace ViewModel
 
         public MainWindowViewModel()
         {
-            AlwaysFalse = false;
+         
 
             #region UserTasks Initialization
             //UserTasks = new ObservableCollection<UserTask>
@@ -171,8 +184,48 @@ namespace ViewModel
             SelectedUserTasksCollection = null;
             IsUserTaskSelected = false;
             IsUserTasksCollectionSelected = false;
+
+            // Поле для хранения старого значения
+            // имени группы (нужно для команды редактирования)
+            _oldGroupName = "";
+
+            // Редактирование группу
+            // Начать редактировать группу можно из режима обзора
+            RelayCommandGroupEdit = 
+                new RelayCommand(GroupEdit, param => IsInModeGroupVeiw );
+
+            // Отменить редактирование группы
+            // Можно в режиме редактирования
+            RelayCommandGroupEditCancel = 
+                new RelayCommand(GroupEditCancel, param => IsInModeGroupEdit);
+
+            // Сохранить изменения в группе
+            // Можно в режиме редактирования
+            RelayCommandGroupEditSave =
+                new RelayCommand(GroupEditSave, param => IsInModeGroupEdit);
+
+            // Создать новую группу
+            // Создать группу можно, если не включен режим 
+            // редактирование или создания новой группы или задачи
+            RelayCommandGroupCreate = 
+                new RelayCommand(GroupCreate, param => IsNotInEditingOrCreating);            
+            
+            // Сохранить созданную группу
+            // Можно в режиме создания группы
+            RelayCommandGroupSaveNew =
+                new RelayCommand(GroupCreateSave, param => IsInModeGroupGreate);
+
+            // Отменить создание группы
+            // Можно в режиме создания группы
+            RelayCommandGroupCreateCancel = 
+                new RelayCommand(GroupCreateCancel, param => IsInModeGroupGreate);
+
+        
+
             //IsWorkingWithSelectedTask = false;
         }
+
+        private string _oldGroupName;
 
         public WorkingMode WorkingMode
         {
@@ -181,57 +234,79 @@ namespace ViewModel
             {
                 _workingMode = value; 
                 OnPropertyChanged(nameof(WorkingMode));
+
+                // Обновление вычисляемых свойств
+                // сами они не обновятся
+                OnPropertyChanged(nameof(IsInDefaultMode));
+                OnPropertyChanged(nameof(IsInModeTaskView));
+                OnPropertyChanged(nameof(IsInModeTaskEdit));
+                OnPropertyChanged(nameof(IsInModeTaskCreate));
+                OnPropertyChanged(nameof(IsInModeGroupVeiw));
+                OnPropertyChanged(nameof(IsInModeGroupEdit));
+                OnPropertyChanged(nameof(IsInModeGroupGreate));
+
+                OnPropertyChanged(nameof(IsWorkingWithGroup));
+                OnPropertyChanged(nameof(IsWorkingWithTask));
+                OnPropertyChanged(nameof(IsInModeGroupViewOrEdit));
+                OnPropertyChanged(nameof(IsNotInEditingOrCreating));
+                OnPropertyChanged(nameof(IsInModeGroupEditOrCreate));
             }
         }
 
         public bool IsInDefaultMode => 
             WorkingMode == WorkingMode.WorkingModeDefault;
 
-        public bool IsInUserTaskEditMode => 
-            WorkingMode == WorkingMode.WorkingModeUserTaskEdit;
+        public bool IsInModeTaskView =>
+            WorkingMode == WorkingMode.WorkingModeTaskVeiw;
 
-        public bool IsInUserTaskCreateMode => 
-            WorkingMode == WorkingMode.WorkingModeUserTaskCreate;
+        public bool IsInModeTaskEdit =>
+            WorkingMode == WorkingMode.WorkingModeTaskEdit;
 
-        public bool IsInUserTasksCollectionEditMode => 
-            WorkingMode == WorkingMode.WorkingModeUserTasksCollectionEdit;
+        public bool IsInModeTaskCreate =>
+            WorkingMode == WorkingMode.WorkingModeTaskCreate;
 
-        public bool IsInUserTasksCollectionCreateMode => 
-            WorkingMode == WorkingMode.WorkingModeUserTasksCollectionCreate;
+        public bool IsInModeGroupVeiw =>
+            WorkingMode == WorkingMode.WorkingModeGroupView;
 
-        public bool IsInCreating =>
-            WorkingMode == WorkingMode.WorkingModeDefault ||
-            WorkingMode == WorkingMode.WorkingModeUserTaskEdit ||
-            WorkingMode == WorkingMode.WorkingModeUserTasksCollectionEdit;
+        public bool IsInModeGroupEdit =>
+            WorkingMode == WorkingMode.WorkingModeGroupEdit;
 
-        public bool IsAddingNewGroupAvailable =>
-            WorkingMode == WorkingMode.WorkingModeDefault ||
-            WorkingMode == WorkingMode.WorkingModeUserTaskEdit ||
-            WorkingMode == WorkingMode.WorkingModeUserTasksCollectionEdit;
+        public bool IsInModeGroupGreate =>
+            WorkingMode == WorkingMode.WorkingModeGroupCreate;
 
-        public bool IsAddingNewUserTaskAvailable =>
-            WorkingMode == WorkingMode.WorkingModeUserTasksCollectionEdit;
+        public bool IsInModeGroupViewOrEdit =>
+            WorkingMode == WorkingMode.WorkingModeGroupView ||
+            WorkingMode == WorkingMode.WorkingModeGroupEdit;
 
-        public bool IsWorkingWithSelectedGroup =>
-            WorkingMode == WorkingMode.WorkingModeUserTasksCollectionEdit ||
-            WorkingMode == WorkingMode.WorkingModeUserTasksCollectionCreate;
+        public bool IsInModeGroupEditOrCreate =>            
+                WorkingMode == WorkingMode.WorkingModeGroupEdit     ||
+                WorkingMode == WorkingMode.WorkingModeGroupCreate   
+                ;
 
-        public bool IsWorkingWithSelectedTask
-        {
-            get
-            {
-                //return _isWorkingWithSelectedTask;
-               return WorkingMode == WorkingMode.WorkingModeUserTaskEdit ||
-                   WorkingMode == WorkingMode.WorkingModeUserTaskCreate;
-            }
-            //set
-            //{
-            //    _isWorkingWithSelectedTask = value;
-            //    OnPropertyChanged(nameof(IsWorkingWithSelectedTask));
-            //}
-        }
+        public bool IsNotInEditingOrCreating =>
+            !(
+                WorkingMode == WorkingMode.WorkingModeGroupEdit     ||
+                WorkingMode == WorkingMode.WorkingModeGroupCreate   ||
+                WorkingMode == WorkingMode.WorkingModeTaskEdit      ||
+                WorkingMode == WorkingMode.WorkingModeTaskCreate
+                );
 
-        public bool AlwaysFalse { get; }
+        public bool IsWorkingWithGroup =>
+            WorkingMode == WorkingMode.WorkingModeGroupView ||
+            WorkingMode == WorkingMode.WorkingModeGroupEdit ||
+            WorkingMode == WorkingMode.WorkingModeGroupCreate;
+
+        public bool IsWorkingWithTask =>
+            WorkingMode == WorkingMode.WorkingModeTaskVeiw ||
+            WorkingMode == WorkingMode.WorkingModeTaskEdit ||
+            WorkingMode == WorkingMode.WorkingModeTaskCreate;
+
+        public RelayCommand RelayCommandGroupCreate { get; set; }
+        public RelayCommand RelayCommandGroupEditSave { get; set; }
+        public RelayCommand RelayCommandGroupSaveNew { get; set; }
+        public RelayCommand RelayCommandGroupEdit { get; set; }
+        public RelayCommand RelayCommandGroupCreateCancel { get; set; }
+        public RelayCommand RelayCommandGroupEditCancel { get; set; }
 
         public UserTask SelectedTask
         {
@@ -250,25 +325,17 @@ namespace ViewModel
             set
             {
                 _isUserTaskSelected = value;
-            //    IsUserTasksCollectionSelected = !value;
                 if (value)
                 {
                     IsUserTasksCollectionSelected = false;
+                    WorkingMode = WorkingMode.WorkingModeTaskVeiw;
                 }
-                IsInProgressUserTaskCreating = (value) || IsInProgressUserTaskCreating ;
+//                IsInProgressUserTaskCreating = (value) || IsInProgressUserTaskCreating ;
+                
                 OnPropertyChanged(nameof(IsUserTaskSelected));
             }
         }
 
-        public bool IsInProgressUserTaskCreating
-        {
-            get { return _isInProgressUserTaskCreate; }
-            set
-            {
-                _isInProgressUserTaskCreate = value; 
-                OnPropertyChanged(nameof(IsInProgressUserTaskCreating));
-            }
-        }
 
         public UserTasksCollection SelectedUserTasksCollection
         {
@@ -292,20 +359,12 @@ namespace ViewModel
                 if (value)
                 {
                     IsUserTaskSelected = false;
+                    WorkingMode = WorkingMode.WorkingModeGroupView;
                 }
                 OnPropertyChanged(nameof(IsUserTasksCollectionSelected));
             }
         }
 
-        public bool IsInProgressUserTasksCollectionCreating
-        {
-            get { return _isInProgressUserTasksCollectionCreate; }
-            set
-            {
-                _isInProgressUserTasksCollectionCreate = value; 
-                OnPropertyChanged(nameof(IsInProgressUserTasksCollectionCreating));
-            }
-        }
 
         public event PropertyChangedEventHandler PropertyChanged;
 
@@ -322,51 +381,98 @@ namespace ViewModel
             //SelectedUserTasksCollection = newUserTasksCollection;
         }
 
-        public void NewGenericGroupCreate()
+        // Создание группы
+
+        public void GroupCreate(object obj)
         {
-            WorkingMode = WorkingMode.WorkingModeUserTasksCollectionCreate;
+            WorkingMode = WorkingMode.WorkingModeGroupCreate;
             var newGroup = new UserTasksCollection {GroupName = "Новая Группа"};
             SelectedUserTasksCollection = newGroup;
         }
 
-        public void SaveNewGroup(UserTasksCollection newGroup)
-        {
-            SuperCollectionTasks.Add(newGroup);
-            WorkingMode = WorkingMode.WorkingModeUserTasksCollectionEdit;
-        }
-
-        public void CancelNewGroupCreation()
+        public void GroupCreateCancel(object obj)
         {
             SelectedUserTasksCollection = null;
             WorkingMode = WorkingMode.WorkingModeDefault;
         }
 
-        public void NewGenericUserTaskCreate()
+        public void GroupCreateSave(object obj)
         {
-            WorkingMode = WorkingMode.WorkingModeUserTaskCreate;
-            var newUserTask = new UserTask
-            {
-                Name = "Новая задача",
-                Description = "",
-                DueDate = DateTime.Today.AddDays(1),
-                Status = Model.TaskStatus.New,
-                Group = SelectedUserTasksCollection.GroupName
-            };
-            SelectedTask = newUserTask;
+            GroupEditSave(obj);
+            SuperCollectionTasks.Add(SelectedUserTasksCollection);
 
         }
 
-        public void SaveNewUserTask(UserTask newUserTask)
+        // Редактирование группы
+        public void GroupEdit(object obj)
         {
-            SelectedUserTasksCollection.Add(newUserTask);
-            WorkingMode = WorkingMode.WorkingModeUserTaskEdit;
+            _oldGroupName = SelectedUserTasksCollection.GroupName;
+            WorkingMode = WorkingMode.WorkingModeGroupEdit;
         }
 
-        public void CancelNewUserTaskCreation()
+        public void GroupEditSave(object obj)
         {
-            SelectedTask = null;
-            WorkingMode = WorkingMode.WorkingModeDefault;
+          //  SelectedUserTasksCollection.GroupName = (string) groupName;
+            WorkingMode = WorkingMode.WorkingModeGroupView;
         }
+
+        public void GroupEditCancel(object obj)
+        {
+            SelectedUserTasksCollection.GroupName = _oldGroupName;
+            WorkingMode = WorkingMode.WorkingModeGroupView;
+        }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+        //public void SaveNewGroup(UserTasksCollection newGroup)
+        //{
+        //    SuperCollectionTasks.Add(newGroup);
+        //    WorkingMode = WorkingMode.WorkingModeUserTasksCollectionEdit;
+        //}
+
+        //public void NewGenericUserTaskCreate()
+        //{
+        //    WorkingMode = WorkingMode.WorkingModeUserTaskCreate;
+        //    var newUserTask = new UserTask
+        //    {
+        //        Name = "Новая задача",
+        //        Description = "",
+        //        DueDate = DateTime.Today.AddDays(1),
+        //        Status = Model.TaskStatus.New,
+        //        Group = SelectedUserTasksCollection.GroupName
+        //    };
+        //    SelectedTask = newUserTask;
+
+        //}
+
+        //public void SaveNewUserTask(UserTask newUserTask)
+        //{
+        //    SelectedUserTasksCollection.Add(newUserTask);
+        //    WorkingMode = WorkingMode.WorkingModeUserTaskEdit;
+        //}
+
+        //public void CancelNewUserTaskCreation()
+        //{
+        //    SelectedTask = null;
+        //    WorkingMode = WorkingMode.WorkingModeDefault;
+        //}
 
         //public void NewUserTask(string name, string description, DateTime dueDate, Model.TaskStatus status)
         //{

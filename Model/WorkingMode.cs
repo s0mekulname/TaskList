@@ -1,17 +1,42 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel;
+using System.ComponentModel.DataAnnotations;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
 namespace Model
 {
+    // Режимы работы приложения
     public enum WorkingMode
     {
-       WorkingModeDefault = 0,
-       WorkingModeUserTaskEdit = 1,
-       WorkingModeUserTaskCreate = 2,
-       WorkingModeUserTasksCollectionEdit = 3,
-       WorkingModeUserTasksCollectionCreate = 4
+        // Ничего не выбрано
+        [Description("Ничего не выбрано")]
+        WorkingModeDefault = 0,
+
+        // Обзор задачи
+        [Description("Обзор задачи")]
+        WorkingModeTaskVeiw = 11,
+
+        // Редактирование задачи
+        [Description("Редактирование задачи")]
+        WorkingModeTaskEdit = 12,
+
+        // Создание новой задачи
+        [Description("Создание новой задачи")]
+        WorkingModeTaskCreate = 13,
+
+        // Обзор группы
+        [Description("Обзор группы")]
+        WorkingModeGroupView = 21,
+
+        // Редактирование группы
+        [Description("Редактирование группы")]
+        WorkingModeGroupEdit = 22,
+
+        // Создание новой группы
+        [Description("Создание новой группы")]
+        WorkingModeGroupCreate = 23
     }
 }

@@ -104,6 +104,10 @@
       <Project>{b1c923ce-0050-4b68-abde-68a7c9fcc912}</Project>
       <Name>Model</Name>
     </ProjectReference>
+    <ProjectReference Include="..\ValueConverters\ValueConverters.csproj">
+      <Project>{c1368948-7639-492a-aa12-bac5abb913a9}</Project>
+      <Name>ValueConverters</Name>
+    </ProjectReference>
     <ProjectReference Include="..\ViewModel\ViewModel.csproj">
       <Project>{43C159BC-E432-407B-AF19-4D7F2B87A4F9}</Project>
       <Name>ViewModel</Name>
