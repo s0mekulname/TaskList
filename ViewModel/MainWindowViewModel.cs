@@ -14,12 +14,21 @@ namespace ViewModel
     {
         private string _groupName;
 
+        private void GroupNameUpdate()
+        {
+            foreach (var task in this)
+            {
+                task.Group = _groupName;
+            }
+        }
+
         public string GroupName
         {
             get { return _groupName; }
             set
             {
                 _groupName = value; 
+                GroupNameUpdate();
                 OnPropertyChanged(nameof(GroupName));
             }
         }
@@ -185,9 +194,28 @@ namespace ViewModel
             IsUserTaskSelected = false;
             IsUserTasksCollectionSelected = false;
 
+            _oldSelectedGroup = null;
+            _oldSelectedUserTask = null;
+
             // Поле для хранения старого значения
             // имени группы (нужно для команды редактирования)
-            _oldGroupName = "";
+            //_oldGroupName = "";
+
+            // Создать новую группу
+            // Создать группу можно, если не включен режим 
+            // редактирование или создания новой группы или задачи
+            RelayCommandGroupCreate = 
+                new RelayCommand(GroupCreate, param => IsNotInEditingOrCreating);
+
+            // Сохранить созданную группу
+            // Можно в режиме создания группы
+            RelayCommandGroupCreateSave =
+                new RelayCommand(GroupCreateSave, param => IsInModeGroupCreate);
+
+            // Отменить создание группы
+            // Можно в режиме создания группы
+            RelayCommandGroupCreateCancel =
+                new RelayCommand(GroupCreateCancel, param => IsInModeGroupCreate);
 
             // Редактирование группу
             // Начать редактировать группу можно из режима обзора
@@ -204,28 +232,57 @@ namespace ViewModel
             RelayCommandGroupEditSave =
                 new RelayCommand(GroupEditSave, param => IsInModeGroupEdit);
 
-            // Создать новую группу
-            // Создать группу можно, если не включен режим 
-            // редактирование или создания новой группы или задачи
-            RelayCommandGroupCreate = 
-                new RelayCommand(GroupCreate, param => IsNotInEditingOrCreating);            
-            
-            // Сохранить созданную группу
-            // Можно в режиме создания группы
-            RelayCommandGroupSaveNew =
-                new RelayCommand(GroupCreateSave, param => IsInModeGroupGreate);
 
-            // Отменить создание группы
-            // Можно в режиме создания группы
-            RelayCommandGroupCreateCancel = 
-                new RelayCommand(GroupCreateCancel, param => IsInModeGroupGreate);
+            // задачи
 
-        
+            // Создать новую задачу
+            // Создать задачу можно в режиме просмотра группы
+            RelayCommandTaskCreate =
+                new RelayCommand(TaskCreate, param => IsInModeGroupVeiw);
+
+            // Сохранить созданную задачу
+            // Можно в режиме создания задачи
+            RelayCommandTaskCreateSave =
+                new RelayCommand(TaskCreateSave, param => IsInModeTaskCreate);
+
+            // Отменить создание задачи
+            // Можно в режиме создания задачи
+            RelayCommandTaskCreateCancel =
+                new RelayCommand(TaskCreateCancel, param => IsInModeTaskCreate);
+
+            // Редактирование задачи
+            // Начать редактировать задачу можно из режима обзора задачи
+            RelayCommandTaskEdit =
+                new RelayCommand(TaskEdit, param => IsInModeTaskView);
+
+            // Отменить редактирование задачи
+            // Можно в режиме редактирования задачи
+            RelayCommandTaskEditCancel =
+                new RelayCommand(TaskEditCancel, param => IsInModeTaskEdit);
+
+            // Сохранить изменения в задаче
+            // Можно в режиме редактирования задачи
+            RelayCommandTaskEditSave =
+                new RelayCommand(TaskEditSave, param => IsInModeTaskEdit);
+
+
+
+
 
             //IsWorkingWithSelectedTask = false;
         }
 
-        private string _oldGroupName;
+        //private string _oldGroupName;
+
+        private UserTask _oldSelectedUserTask;
+
+        //private string _oldTaskName;
+        //private string _oldTaskDescription;
+        //private DateTime _oldTaskDueDate;
+        //private Model.TaskStatus _oldTaskStatus;
+        //private string _oldTaskGroup;
+
+        private UserTasksCollection _oldSelectedGroup;
 
         public WorkingMode WorkingMode
         {
@@ -243,7 +300,7 @@ namespace ViewModel
                 OnPropertyChanged(nameof(IsInModeTaskCreate));
                 OnPropertyChanged(nameof(IsInModeGroupVeiw));
                 OnPropertyChanged(nameof(IsInModeGroupEdit));
-                OnPropertyChanged(nameof(IsInModeGroupGreate));
+                OnPropertyChanged(nameof(IsInModeGroupCreate));
 
                 OnPropertyChanged(nameof(IsWorkingWithGroup));
                 OnPropertyChanged(nameof(IsWorkingWithTask));
@@ -271,7 +328,7 @@ namespace ViewModel
         public bool IsInModeGroupEdit =>
             WorkingMode == WorkingMode.WorkingModeGroupEdit;
 
-        public bool IsInModeGroupGreate =>
+        public bool IsInModeGroupCreate =>
             WorkingMode == WorkingMode.WorkingModeGroupCreate;
 
         public bool IsInModeGroupViewOrEdit =>
@@ -302,11 +359,20 @@ namespace ViewModel
             WorkingMode == WorkingMode.WorkingModeTaskCreate;
 
         public RelayCommand RelayCommandGroupCreate { get; set; }
-        public RelayCommand RelayCommandGroupEditSave { get; set; }
-        public RelayCommand RelayCommandGroupSaveNew { get; set; }
-        public RelayCommand RelayCommandGroupEdit { get; set; }
+        public RelayCommand RelayCommandGroupCreateSave { get; set; }
         public RelayCommand RelayCommandGroupCreateCancel { get; set; }
+
+        public RelayCommand RelayCommandGroupEdit { get; set; }
+        public RelayCommand RelayCommandGroupEditSave { get; set; }       
         public RelayCommand RelayCommandGroupEditCancel { get; set; }
+
+        public RelayCommand RelayCommandTaskCreate { get; set; }
+        public RelayCommand RelayCommandTaskCreateSave { get; set; }
+        public RelayCommand RelayCommandTaskCreateCancel { get; set; }
+
+        public RelayCommand RelayCommandTaskEdit { get; set; }
+        public RelayCommand RelayCommandTaskEditSave { get; set; }
+        public RelayCommand RelayCommandTaskEditCancel { get; set; }
 
         public UserTask SelectedTask
         {
@@ -406,20 +472,99 @@ namespace ViewModel
         // Редактирование группы
         public void GroupEdit(object obj)
         {
-            _oldGroupName = SelectedUserTasksCollection.GroupName;
+            _oldSelectedGroup = SelectedUserTasksCollection;
+
+            var tempGroup = new UserTasksCollection
+            {
+                GroupName = _oldSelectedGroup.GroupName
+            };
+
+            SelectedUserTasksCollection = tempGroup;
+
             WorkingMode = WorkingMode.WorkingModeGroupEdit;
         }
 
         public void GroupEditSave(object obj)
         {
-          //  SelectedUserTasksCollection.GroupName = (string) groupName;
+            _oldSelectedGroup.GroupName = SelectedUserTasksCollection.GroupName;
+            SelectedUserTasksCollection = _oldSelectedGroup;
+            _oldSelectedGroup = null;
             WorkingMode = WorkingMode.WorkingModeGroupView;
         }
 
         public void GroupEditCancel(object obj)
         {
-            SelectedUserTasksCollection.GroupName = _oldGroupName;
+            SelectedUserTasksCollection = _oldSelectedGroup;
+            _oldSelectedGroup = null;
             WorkingMode = WorkingMode.WorkingModeGroupView;
+        }
+
+        public void TaskCreate(object obj)
+        {
+            var newUserTask = new UserTask
+            {
+                Name = "Новая задача",
+                Description = "Добавьте описание",
+                DueDate = DateTime.Today.AddDays(1),
+                Status = Model.TaskStatus.New,
+                Group = SelectedUserTasksCollection.GroupName
+            };
+    //        _oldSelectedGroup = SelectedUserTasksCollection;
+            SelectedTask = newUserTask;
+            WorkingMode = WorkingMode.WorkingModeTaskCreate;
+        }
+
+        public void TaskCreateSave(object obj)
+        {
+            SelectedUserTasksCollection.Add(SelectedTask);
+            WorkingMode = WorkingMode.WorkingModeTaskVeiw;
+            
+            // TODO: Добавить код добавления в авто-группы
+        }
+
+        public void TaskCreateCancel(object obj)
+        {
+            SelectedTask = null;
+            WorkingMode = WorkingMode.WorkingModeGroupView;
+        }
+
+        public void TaskEdit(object obj)
+        {
+            _oldSelectedUserTask = SelectedTask;
+
+            var tempTask = new UserTask
+            {
+                Name = _oldSelectedUserTask.Name,
+                Description = _oldSelectedUserTask.Description,
+                DueDate = _oldSelectedUserTask.DueDate,
+                Status = _oldSelectedUserTask.Status,
+                Group = _oldSelectedUserTask.Group
+            };
+
+            SelectedTask = tempTask;
+
+
+            WorkingMode = WorkingMode.WorkingModeTaskEdit;
+        }
+
+        public void TaskEditCancel(object obj)
+        {
+            SelectedTask = _oldSelectedUserTask;
+            _oldSelectedUserTask = null;
+            WorkingMode = WorkingMode.WorkingModeTaskVeiw;
+        }
+
+        public void TaskEditSave(object obj)
+        {
+            _oldSelectedUserTask.Name = SelectedTask.Name;
+            _oldSelectedUserTask.Description = SelectedTask.Description;
+            _oldSelectedUserTask.DueDate = SelectedTask.DueDate;
+            _oldSelectedUserTask.Status = SelectedTask.Status;
+            _oldSelectedUserTask.Group = SelectedTask.Group;
+
+            SelectedTask = _oldSelectedUserTask;
+            _oldSelectedUserTask = null;
+            WorkingMode = WorkingMode.WorkingModeTaskVeiw;
         }
 
 
@@ -432,47 +577,6 @@ namespace ViewModel
 
 
 
-
-
-
-
-
-
-
-
-
-        //public void SaveNewGroup(UserTasksCollection newGroup)
-        //{
-        //    SuperCollectionTasks.Add(newGroup);
-        //    WorkingMode = WorkingMode.WorkingModeUserTasksCollectionEdit;
-        //}
-
-        //public void NewGenericUserTaskCreate()
-        //{
-        //    WorkingMode = WorkingMode.WorkingModeUserTaskCreate;
-        //    var newUserTask = new UserTask
-        //    {
-        //        Name = "Новая задача",
-        //        Description = "",
-        //        DueDate = DateTime.Today.AddDays(1),
-        //        Status = Model.TaskStatus.New,
-        //        Group = SelectedUserTasksCollection.GroupName
-        //    };
-        //    SelectedTask = newUserTask;
-
-        //}
-
-        //public void SaveNewUserTask(UserTask newUserTask)
-        //{
-        //    SelectedUserTasksCollection.Add(newUserTask);
-        //    WorkingMode = WorkingMode.WorkingModeUserTaskEdit;
-        //}
-
-        //public void CancelNewUserTaskCreation()
-        //{
-        //    SelectedTask = null;
-        //    WorkingMode = WorkingMode.WorkingModeDefault;
-        //}
 
         //public void NewUserTask(string name, string description, DateTime dueDate, Model.TaskStatus status)
         //{

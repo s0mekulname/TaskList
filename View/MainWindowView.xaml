@@ -85,18 +85,15 @@
         <GroupBox x:Name="GroupBoxSelectedTask"
             Header="Выбранная задача"
             Grid.Row="0" Grid.Column="1"
-            Visibility="{Binding IsUserTaskSelected, Converter={StaticResource Bool2Vis}}"   
-                  
-                  >
+            Visibility="{Binding IsUserTaskSelected, Converter={StaticResource Bool2Vis}}">
             
             <StackPanel
-               
                 >
                 <TextBlock Text="Название задачи"/>
-                <TextBox Text="{Binding SelectedTask.Name,Mode=OneWay}"/>
+                <TextBox Text="{Binding SelectedTask.Name}"/>
                 <TextBlock Text="Описание задачи"/>
                 <TextBox
-                    Text="{Binding SelectedTask.Description,Mode=OneWay}"
+                    Text="{Binding SelectedTask.Description}"
                     AcceptsReturn="True"
                     TextWrapping="Wrap"
                     />
@@ -104,11 +101,11 @@
                 <ComboBox
                     ItemsSource="{extensions:EnumValuesExtension {x:Type model:TaskStatus}}"
                     SelectedValuePath="EnumValue" DisplayMemberPath="DisplayString" 
-                    SelectedValue="{Binding SelectedTask.Status,Mode=OneWay}"
+                    SelectedValue="{Binding SelectedTask.Status}"
                    />
                 
                 <TextBlock Text="Планируемая дата завершения"/>
-                <DatePicker SelectedDate="{Binding  SelectedTask.DueDate,Mode=OneWay}"/>
+                <DatePicker SelectedDate="{Binding  SelectedTask.DueDate}"/>
 
                 <!-- Стек-панель с кнопками "редактировать, сохранить, отмена" -->
                 <StackPanel x:Name="StackPanelEditNewTask"
@@ -135,9 +132,7 @@
                   
                   >
 
-            <StackPanel
-               
-                >
+            <StackPanel x:Name="StackPanelWorkWithGroup">
                 <TextBlock Text="Название Группы"/>
                 <TextBox Text="{Binding SelectedUserTasksCollection.GroupName,Mode=TwoWay}"
                          IsEnabled="{Binding IsInModeGroupEditOrCreate}"/>
@@ -145,7 +140,7 @@
                 <!-- Стек-панель с кнопками "редактировать, сохранить, отмена" для новой группы -->
                 <StackPanel x:Name="StackPanelGroupGreate"
                     Orientation="Vertical"
-                    Visibility="{Binding IsInModeGroupGreate, Converter={StaticResource Bool2Vis}}">
+                    Visibility="{Binding IsInModeGroupCreate, Converter={StaticResource Bool2Vis}}">
                     <Button Content="Редактировать"
                             IsEnabled="False"
                             />
@@ -189,3 +184,4 @@
         </GroupBox>
     </Grid>
 </Window>
+
