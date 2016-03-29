@@ -18,11 +18,6 @@ namespace View
             TreeViewTasks.ItemsSource = ViewModel.SuperCollectionTasks;
         }
 
-        private void ButtonAddGroup_Click(object sender, RoutedEventArgs e)
-        {
-
-        }
-
         private void TreeViewTasks_OnSelectedItemChanged(object sender, RoutedPropertyChangedEventArgs<object> e)
         {
             var value = e.NewValue;
@@ -30,9 +25,9 @@ namespace View
             {
                 ViewModel.SelectedTask = (UserTask)value;
             }
-            else if (value is UserTasksCollection)
+            else if (value is TaskGroup)
             {
-                ViewModel.SelectedUserTasksCollection = (UserTasksCollection)value;
+                ViewModel.SelectedTaskGroup = (TaskGroup)value;
             }
 
         }

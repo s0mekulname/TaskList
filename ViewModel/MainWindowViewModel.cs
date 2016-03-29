@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Runtime.CompilerServices;
@@ -9,56 +8,23 @@ using TaskStatus = Model.TaskStatus;
 
 namespace ViewModel
 {
-
-    public class UserTasksCollection : ObservableCollection<UserTask>, INotifyPropertyChanged
-    {
-        private string _groupName;
-
-        private void GroupNameUpdate()
-        {
-            foreach (var task in this)
-            {
-                task.Group = _groupName;
-            }
-        }
-
-        public string GroupName
-        {
-            get { return _groupName; }
-            set
-            {
-                _groupName = value; 
-                GroupNameUpdate();
-                OnPropertyChanged(nameof(GroupName));
-            }
-        }
-
-        protected override event PropertyChangedEventHandler PropertyChanged;
-
-        [NotifyPropertyChangedInvocator]
-        protected virtual void OnPropertyChanged([CallerMemberName] string propertyName = null)
-        {
-            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
-        }
-    }
-
     public class MainWindowViewModel : INotifyPropertyChanged
     {
         private UserTask _selectedTask;
-        private UserTasksCollection _selectedUserTasksCollection;
+        private TaskGroup _selectedTaskGroup;
         private bool _isUserTaskSelected;
         private bool _isUserTasksCollectionSelected;
         private WorkingMode _workingMode;
-        public UserTasksCollection UserTasks { get; set; }
+        public TaskGroup AllUserTasks { get; set; }
 
-        public UserTasksCollection ExpiredTasks { get; set; }
+        public TaskGroup ExpiredTasks { get; set; }
 
-        public UserTasksCollection ExpireTomorrowTasks { get; set; }
+        public TaskGroup ExpireTomorrowTasks { get; set; }
 
-        public UserTasksCollection DefaultTasks { get; set; }
+        public TaskGroup DefaultTasks { get; set; }
 
         // Иерархическая коллекция всех групп
-        public ObservableCollection<UserTasksCollection> SuperCollectionTasks { get; set; }
+        public ObservableCollection<TaskGroup> SuperCollectionTasks { get; set; }
 
         public MainWindowViewModel()
         {
@@ -112,64 +78,68 @@ namespace ViewModel
 
 
 #region UserTasks Initialization 2
-            UserTasks = new UserTasksCollection
+
+            AllUserTasks = new TaskGroup
             {
-                new UserTask
+                UserTasks = new ObservableCollection<UserTask>
                 {
-                    Name = "New Task 1",
-                    Description = "Description 1",
-                    DueDate = Convert.ToDateTime("2016-04-1"),
-                    Status = TaskStatus.New,
-                    Group = "Default"
+                    new UserTask
+                    {
+                        Name = "New Task 1",
+                        Description = "Description 1",
+                        DueDate = Convert.ToDateTime("2016-04-1"),
+                        Status = TaskStatus.New,
+                        Group = "Default"
+                    },
+                    new UserTask
+                    {
+                        Name = "Postponded Task 2",
+                        Description = "Description 2",
+                        DueDate = Convert.ToDateTime("2015-01-01"),
+                        Status = TaskStatus.Postponded,
+                        Group = "Default"
+                    },
+                    new UserTask
+                    {
+                        Name = "In Progress Task 4",
+                        Description = "Description 1",
+                        DueDate = Convert.ToDateTime("2016-05-03"),
+                        Status = TaskStatus.InProgress,
+                        Group = "Default"
+                    },
+                    new UserTask
+                    {
+                        Name = "Completed Task 5",
+                        Description = "Description 1",
+                        DueDate = Convert.ToDateTime("2016-03-1"),
+                        Status = TaskStatus.Completed,
+                        Group = "Default"
+                    },
+                    new UserTask
+                    {
+                        Name = "Canceled Task 6",
+                        Description = "Description 1",
+                        DueDate = Convert.ToDateTime("2017-03-30"),
+                        Status = TaskStatus.Canceled,
+                        Group = "Default"
+                    }
                 },
-                new UserTask
-                {
-                    Name = "Postponded Task 2",
-                    Description = "Description 2",
-                    DueDate = Convert.ToDateTime("2015-01-01"),
-                    Status = TaskStatus.Postponded,
-                    Group = "Default"
-                },
-                new UserTask
-                {
-                    Name = "In Progress Task 4",
-                    Description = "Description 1",
-                    DueDate = Convert.ToDateTime("2016-05-03"),
-                    Status = TaskStatus.InProgress,
-                    Group = "Default"
-                },
-                new UserTask
-                {
-                    Name = "Completed Task 5",
-                    Description = "Description 1",
-                    DueDate = Convert.ToDateTime("2016-03-1"),
-                    Status = TaskStatus.Completed,
-                    Group = "Default"
-                },
-                new UserTask
-                {
-                    Name = "Canceled Task 6",
-                    Description = "Description 1",
-                    DueDate = Convert.ToDateTime("2017-03-30"),
-                    Status = TaskStatus.Canceled,
-                    Group = "Default"
-                }
+                GroupName = "All"
             };
-            UserTasks.GroupName = "All";
 
             #endregion
 
-            ExpiredTasks = new UserTasksCollection()
+            ExpiredTasks = new TaskGroup()
             {
                 GroupName = "Expired"
             };
 
-            ExpireTomorrowTasks = new UserTasksCollection()
+            ExpireTomorrowTasks = new TaskGroup()
             {
                 GroupName = "Expire Tomorrow"
             };
 
-            DefaultTasks = new UserTasksCollection()
+            DefaultTasks = new TaskGroup()
             {
                 GroupName = "Default"
                
@@ -177,12 +147,12 @@ namespace ViewModel
 
             // Добавляем элемнты из UserTasks в DefaultTasks
             // TODO: (Должно быть лучшее решение для копирования)
-            foreach (var u in UserTasks)
+            foreach (var u in AllUserTasks.UserTasks)
             {
-                DefaultTasks.Add(u);
+                DefaultTasks.UserTasks.Add(u);
             }
 
-            SuperCollectionTasks = new ObservableCollection<UserTasksCollection>
+            SuperCollectionTasks = new ObservableCollection<TaskGroup>
             {
                 DefaultTasks,
                 ExpiredTasks,
@@ -190,7 +160,7 @@ namespace ViewModel
             };
             SelectedTask = null;
             WorkingMode = WorkingMode.WorkingModeDefault;
-            SelectedUserTasksCollection = null;
+            SelectedTaskGroup = null;
             IsUserTaskSelected = false;
             IsUserTasksCollectionSelected = false;
 
@@ -282,7 +252,7 @@ namespace ViewModel
         //private Model.TaskStatus _oldTaskStatus;
         //private string _oldTaskGroup;
 
-        private UserTasksCollection _oldSelectedGroup;
+        private TaskGroup _oldSelectedGroup;
 
         public WorkingMode WorkingMode
         {
@@ -305,8 +275,10 @@ namespace ViewModel
                 OnPropertyChanged(nameof(IsWorkingWithGroup));
                 OnPropertyChanged(nameof(IsWorkingWithTask));
                 OnPropertyChanged(nameof(IsInModeGroupViewOrEdit));
+                OnPropertyChanged(nameof(IsInModeTaskViewOrEdit));
                 OnPropertyChanged(nameof(IsNotInEditingOrCreating));
                 OnPropertyChanged(nameof(IsInModeGroupEditOrCreate));
+                OnPropertyChanged(nameof(IsInModeTaskEditOrCreate));
             }
         }
 
@@ -335,9 +307,18 @@ namespace ViewModel
             WorkingMode == WorkingMode.WorkingModeGroupView ||
             WorkingMode == WorkingMode.WorkingModeGroupEdit;
 
+        public bool IsInModeTaskViewOrEdit =>
+            WorkingMode == WorkingMode.WorkingModeTaskVeiw ||
+            WorkingMode == WorkingMode.WorkingModeTaskEdit;
+
         public bool IsInModeGroupEditOrCreate =>            
                 WorkingMode == WorkingMode.WorkingModeGroupEdit     ||
                 WorkingMode == WorkingMode.WorkingModeGroupCreate   
+                ;
+
+        public bool IsInModeTaskEditOrCreate =>            
+                WorkingMode == WorkingMode.WorkingModeTaskEdit     ||
+                WorkingMode == WorkingMode.WorkingModeTaskCreate   
                 ;
 
         public bool IsNotInEditingOrCreating =>
@@ -396,22 +377,21 @@ namespace ViewModel
                     IsUserTasksCollectionSelected = false;
                     WorkingMode = WorkingMode.WorkingModeTaskVeiw;
                 }
-//                IsInProgressUserTaskCreating = (value) || IsInProgressUserTaskCreating ;
                 
                 OnPropertyChanged(nameof(IsUserTaskSelected));
             }
         }
 
 
-        public UserTasksCollection SelectedUserTasksCollection
+        public TaskGroup SelectedTaskGroup
         {
-            get { return _selectedUserTasksCollection; }
+            get { return _selectedTaskGroup; }
             set
             {
-                _selectedUserTasksCollection = value;
+                _selectedTaskGroup = value;
                 
                 IsUserTasksCollectionSelected = (value != null);
-                OnPropertyChanged(nameof(SelectedUserTasksCollection));
+                OnPropertyChanged(nameof(SelectedTaskGroup));
             }
         }
 
@@ -442,9 +422,9 @@ namespace ViewModel
 
         public void NewUserTasksCollection(string name)
         {
-            var newUserTasksCollection = new UserTasksCollection {GroupName = name};
+            var newUserTasksCollection = new TaskGroup {GroupName = name};
             SuperCollectionTasks.Add(newUserTasksCollection);
-            //SelectedUserTasksCollection = newUserTasksCollection;
+            //SelectedTaskGroup = newUserTasksCollection;
         }
 
         // Создание группы
@@ -452,49 +432,49 @@ namespace ViewModel
         public void GroupCreate(object obj)
         {
             WorkingMode = WorkingMode.WorkingModeGroupCreate;
-            var newGroup = new UserTasksCollection {GroupName = "Новая Группа"};
-            SelectedUserTasksCollection = newGroup;
+            var newGroup = new TaskGroup {GroupName = "Новая Группа"};
+            SelectedTaskGroup = newGroup;
         }
 
         public void GroupCreateCancel(object obj)
         {
-            SelectedUserTasksCollection = null;
+            SelectedTaskGroup = null;
             WorkingMode = WorkingMode.WorkingModeDefault;
         }
 
         public void GroupCreateSave(object obj)
         {
             GroupEditSave(obj);
-            SuperCollectionTasks.Add(SelectedUserTasksCollection);
+            SuperCollectionTasks.Add(SelectedTaskGroup);
 
         }
 
         // Редактирование группы
         public void GroupEdit(object obj)
         {
-            _oldSelectedGroup = SelectedUserTasksCollection;
+            _oldSelectedGroup = SelectedTaskGroup;
 
-            var tempGroup = new UserTasksCollection
+            var tempGroup = new TaskGroup
             {
                 GroupName = _oldSelectedGroup.GroupName
             };
 
-            SelectedUserTasksCollection = tempGroup;
+            SelectedTaskGroup = tempGroup;
 
             WorkingMode = WorkingMode.WorkingModeGroupEdit;
         }
 
         public void GroupEditSave(object obj)
         {
-            _oldSelectedGroup.GroupName = SelectedUserTasksCollection.GroupName;
-            SelectedUserTasksCollection = _oldSelectedGroup;
+            _oldSelectedGroup.GroupName = SelectedTaskGroup.GroupName;
+            SelectedTaskGroup = _oldSelectedGroup;
             _oldSelectedGroup = null;
             WorkingMode = WorkingMode.WorkingModeGroupView;
         }
 
         public void GroupEditCancel(object obj)
         {
-            SelectedUserTasksCollection = _oldSelectedGroup;
+            SelectedTaskGroup = _oldSelectedGroup;
             _oldSelectedGroup = null;
             WorkingMode = WorkingMode.WorkingModeGroupView;
         }
@@ -507,16 +487,16 @@ namespace ViewModel
                 Description = "Добавьте описание",
                 DueDate = DateTime.Today.AddDays(1),
                 Status = Model.TaskStatus.New,
-                Group = SelectedUserTasksCollection.GroupName
+                Group = SelectedTaskGroup.GroupName
             };
-    //        _oldSelectedGroup = SelectedUserTasksCollection;
+    //        _oldSelectedGroup = SelectedTaskGroup;
             SelectedTask = newUserTask;
             WorkingMode = WorkingMode.WorkingModeTaskCreate;
         }
 
         public void TaskCreateSave(object obj)
         {
-            SelectedUserTasksCollection.Add(SelectedTask);
+            SelectedTaskGroup.UserTasks.Add(SelectedTask);
             WorkingMode = WorkingMode.WorkingModeTaskVeiw;
             
             // TODO: Добавить код добавления в авто-группы
@@ -581,7 +561,7 @@ namespace ViewModel
         //public void NewUserTask(string name, string description, DateTime dueDate, Model.TaskStatus status)
         //{
         //    // TODO: Нормально обработать ситуацию, если группа не выбрана
-        //    if (SelectedUserTasksCollection == null) return;
+        //    if (SelectedTaskGroup == null) return;
 
         //    var newUserTask = new UserTask
         //    {
@@ -589,9 +569,9 @@ namespace ViewModel
         //        Description = description,
         //        DueDate = dueDate,
         //        Status = status,
-        //        Group = SelectedUserTasksCollection.GroupName
+        //        Group = SelectedTaskGroup.GroupName
         //    };
-        //    SelectedUserTasksCollection.Add(newUserTask);
+        //    SelectedTaskGroup.Add(newUserTask);
         //}
 
     }
