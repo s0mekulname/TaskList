@@ -124,6 +124,7 @@ namespace ViewModel
                         Group = "Default"
                     }
                 },
+                IsAutoGroup = false,
                 GroupName = "All"
             };
 
@@ -131,18 +132,21 @@ namespace ViewModel
 
             ExpiredTasks = new TaskGroup()
             {
-                GroupName = "Expired"
+                GroupName = "Expired",
+                IsAutoGroup = true
             };
 
             ExpireTomorrowTasks = new TaskGroup()
             {
-                GroupName = "Expire Tomorrow"
+                GroupName = "Expire Tomorrow",
+                IsAutoGroup = true
             };
 
             DefaultTasks = new TaskGroup()
             {
-                GroupName = "Default"
-               
+                GroupName = "Default",
+                IsAutoGroup = false
+
             };
 
             // Добавляем элемнты из UserTasks в DefaultTasks
@@ -150,6 +154,7 @@ namespace ViewModel
             foreach (var u in AllUserTasks.UserTasks)
             {
                 DefaultTasks.UserTasks.Add(u);
+                AutoGroupDistribution(u);
             }
 
             SuperCollectionTasks = new ObservableCollection<TaskGroup>
@@ -188,9 +193,10 @@ namespace ViewModel
                 new RelayCommand(GroupCreateCancel, param => IsInModeGroupCreate);
 
             // Редактирование группу
-            // Начать редактировать группу можно из режима обзора
+            // Начать редактировать группу можно из режима обзора и если
+            // выбранная группа не является автогруппой
             RelayCommandGroupEdit = 
-                new RelayCommand(GroupEdit, param => IsInModeGroupVeiw );
+                new RelayCommand(GroupEdit, param => IsGroupEditAvailable );
 
             // Отменить редактирование группы
             // Можно в режиме редактирования
@@ -279,6 +285,7 @@ namespace ViewModel
                 OnPropertyChanged(nameof(IsNotInEditingOrCreating));
                 OnPropertyChanged(nameof(IsInModeGroupEditOrCreate));
                 OnPropertyChanged(nameof(IsInModeTaskEditOrCreate));
+                OnPropertyChanged(nameof(IsGroupEditAvailable));
             }
         }
 
@@ -338,6 +345,10 @@ namespace ViewModel
             WorkingMode == WorkingMode.WorkingModeTaskVeiw ||
             WorkingMode == WorkingMode.WorkingModeTaskEdit ||
             WorkingMode == WorkingMode.WorkingModeTaskCreate;
+
+        public bool IsGroupEditAvailable =>
+            WorkingMode == WorkingMode.WorkingModeGroupView &&
+            !SelectedTaskGroup.IsAutoGroup; 
 
         public RelayCommand RelayCommandGroupCreate { get; set; }
         public RelayCommand RelayCommandGroupCreateSave { get; set; }
@@ -424,16 +435,21 @@ namespace ViewModel
         {
             var newUserTasksCollection = new TaskGroup {GroupName = name};
             SuperCollectionTasks.Add(newUserTasksCollection);
-            //SelectedTaskGroup = newUserTasksCollection;
+
         }
 
         // Создание группы
 
         public void GroupCreate(object obj)
         {
-            WorkingMode = WorkingMode.WorkingModeGroupCreate;
-            var newGroup = new TaskGroup {GroupName = "Новая Группа"};
+            
+            var newGroup = new TaskGroup
+            {
+                GroupName = "Новая Группа",
+                IsAutoGroup = false
+            };
             SelectedTaskGroup = newGroup;
+            WorkingMode = WorkingMode.WorkingModeGroupCreate;
         }
 
         public void GroupCreateCancel(object obj)
@@ -444,9 +460,9 @@ namespace ViewModel
 
         public void GroupCreateSave(object obj)
         {
-            GroupEditSave(obj);
+            
             SuperCollectionTasks.Add(SelectedTaskGroup);
-
+            WorkingMode = WorkingMode.WorkingModeGroupView;
         }
 
         // Редактирование группы
@@ -489,7 +505,7 @@ namespace ViewModel
                 Status = Model.TaskStatus.New,
                 Group = SelectedTaskGroup.GroupName
             };
-    //        _oldSelectedGroup = SelectedTaskGroup;
+
             SelectedTask = newUserTask;
             WorkingMode = WorkingMode.WorkingModeTaskCreate;
         }
@@ -497,9 +513,8 @@ namespace ViewModel
         public void TaskCreateSave(object obj)
         {
             SelectedTaskGroup.UserTasks.Add(SelectedTask);
-            WorkingMode = WorkingMode.WorkingModeTaskVeiw;
-            
-            // TODO: Добавить код добавления в авто-группы
+            AutoGroupDistribution(SelectedTask);
+            WorkingMode = WorkingMode.WorkingModeTaskVeiw;           
         }
 
         public void TaskCreateCancel(object obj)
@@ -538,41 +553,58 @@ namespace ViewModel
         {
             _oldSelectedUserTask.Name = SelectedTask.Name;
             _oldSelectedUserTask.Description = SelectedTask.Description;
-            _oldSelectedUserTask.DueDate = SelectedTask.DueDate;
+            bool isDateChanged = _oldSelectedUserTask.DueDate.Day == SelectedTask.DueDate.Day;
+            if (isDateChanged)
+            {
+                _oldSelectedUserTask.DueDate = SelectedTask.DueDate;
+            }
+
             _oldSelectedUserTask.Status = SelectedTask.Status;
             _oldSelectedUserTask.Group = SelectedTask.Group;
 
             SelectedTask = _oldSelectedUserTask;
+            if (isDateChanged)
+            {
+                AutoGroupDistribution(SelectedTask);
+            }
             _oldSelectedUserTask = null;
             WorkingMode = WorkingMode.WorkingModeTaskVeiw;
         }
 
+        public void AutoGroupDistribution(UserTask userTask)
+        {
+            var dueDate = userTask.DueDate;
+            var status = userTask.Status;
+            var delta = dueDate.Day - DateTime.Today.Day;
 
+            bool isExpired =
+                status != TaskStatus.Canceled &&
+                status != TaskStatus.Completed &&
+                delta < 0;
 
+            if (isExpired)
+            {
+                ExpiredTasks.UserTasks.Add(userTask);
+            }
+            else if (ExpiredTasks.UserTasks.Contains(userTask))
+            {
+                ExpiredTasks.UserTasks.Remove(userTask);
+            }
 
+            bool isExpireTomorrow =
+                status != TaskStatus.Canceled &&
+                status != TaskStatus.Completed &&
+                (delta == 0 || delta == 1);
 
+            if (isExpireTomorrow)
+            {
+                ExpireTomorrowTasks.UserTasks.Add(userTask);
+            }
+            else if (ExpireTomorrowTasks.UserTasks.Contains(userTask))
+            {
+                ExpireTomorrowTasks.UserTasks.Remove(userTask);
+            }
 
-
-
-
-
-
-
-        //public void NewUserTask(string name, string description, DateTime dueDate, Model.TaskStatus status)
-        //{
-        //    // TODO: Нормально обработать ситуацию, если группа не выбрана
-        //    if (SelectedTaskGroup == null) return;
-
-        //    var newUserTask = new UserTask
-        //    {
-        //        Name = name,
-        //        Description = description,
-        //        DueDate = dueDate,
-        //        Status = status,
-        //        Group = SelectedTaskGroup.GroupName
-        //    };
-        //    SelectedTaskGroup.Add(newUserTask);
-        //}
-
+        }
     }
 }

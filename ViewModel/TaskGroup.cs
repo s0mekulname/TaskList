@@ -11,6 +11,12 @@ namespace ViewModel
         private string _groupName;
         private ObservableCollection<UserTask> _userTasks;
 
+        public TaskGroup()
+        {
+            IsAutoGroup = false;
+        }
+
+        public bool IsAutoGroup { get; set; }
         public ObservableCollection<UserTask> UserTasks
         {
             get

@@ -197,9 +197,7 @@
                             Command="{Binding RelayCommandGroupEdit}"                            
                             />
                     
-                    <StackPanel
-                        Orientation="Horizontal"
-                        />
+                    <StackPanel Orientation="Horizontal">
                         <Button x:Name="ButtonGroupEditSave"
                                 Content="Сохранить"
                                 Command="{Binding RelayCommandGroupEditSave}"                                                     
@@ -213,7 +211,7 @@
                 </StackPanel>
             
 
-
+            </StackPanel>
         </GroupBox>
     </Grid>
 </Window>
