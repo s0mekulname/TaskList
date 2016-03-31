@@ -10,7 +10,9 @@
         xmlns:model="clr-namespace:Model;assembly=Model"
         d:DataContext="{d:DesignInstance viewModel:MainWindowViewModel}"
         mc:Ignorable="d"
-        Title="{Binding WorkingMode,Converter={StaticResource Enum2Descr}}" Height="350" Width="525">
+        Title="{Binding WorkingMode,Converter={StaticResource Enum2Descr}}" Height="350" Width="525"
+        Icon="Images/blue_dot.png"
+        >
     <Window.Resources>
         <BooleanToVisibilityConverter x:Key="Bool2Vis"/>
         
