@@ -66,9 +66,11 @@
                     VerticalAlignment="Bottom">
                     <CheckBox x:Name="CheckBoxShowCompleted"
                               Content="Показать Завершенные"
+                              IsChecked="{Binding Path=IsShowCompleted, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
                               />
                     <CheckBox x:Name="CheckBoxShowCanceled"
                               Content="Показать Отменённые"
+                              IsChecked="{Binding Path=IsShowCanceled, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
                               />
                     
                     <Button x:Name="ButtonGroupCreate"

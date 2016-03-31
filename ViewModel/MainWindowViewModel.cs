@@ -2,6 +2,7 @@
 using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Runtime.CompilerServices;
+using System.Windows.Data;
 using Model;
 using ViewModel.Annotations;
 using TaskStatus = Model.TaskStatus;
@@ -30,54 +31,7 @@ namespace ViewModel
         {
          
 
-            #region UserTasks Initialization
-            //UserTasks = new ObservableCollection<UserTask>
-            //{
-            //    new UserTask
-            //    {
-            //        Name = "New Task 1",
-            //        Description = "Description 1",
-            //        DueDate = Convert.ToDateTime("2016-04-1"),
-            //        Status = TaskStatus.New,
-            //        Group = "Default"
-            //    },
-            //    new UserTask
-            //    {
-            //        Name = "Postponded Task 2",
-            //        Description = "Description 2",
-            //        DueDate = Convert.ToDateTime("2015-01-01"),
-            //        Status = TaskStatus.Postponded,
-            //        Group = "Default"
-            //    },
-            //    new UserTask
-            //    {
-            //        Name = "In Progress Task 4",
-            //        Description = "Description 1",
-            //        DueDate = Convert.ToDateTime("2016-05-03"),
-            //        Status = TaskStatus.InProgress,
-            //        Group = "Default"
-            //    },
-            //    new UserTask
-            //    {
-            //        Name = "Completed Task 5",
-            //        Description = "Description 1",
-            //        DueDate = Convert.ToDateTime("2016-03-1"),
-            //        Status = TaskStatus.Completed,
-            //        Group = "Default"
-            //    },
-            //    new UserTask
-            //    {
-            //        Name = "Canceled Task 6",
-            //        Description = "Description 1",
-            //        DueDate = Convert.ToDateTime("2017-03-30"),
-            //        Status = TaskStatus.Canceled,
-            //        Group = "Default"
-            //    }
-            //};
-            #endregion
-
-
-#region UserTasks Initialization 2
+            #region UserTasks Initialization 2
 
             AllUserTasks = new TaskGroup
             {
@@ -159,10 +113,14 @@ namespace ViewModel
 
             SuperCollectionTasks = new ObservableCollection<TaskGroup>
             {
-                DefaultTasks,
                 ExpiredTasks,
-                ExpireTomorrowTasks
+                ExpireTomorrowTasks,
+                DefaultTasks
+
             };
+
+            IsShowCompleted = true;
+            IsShowCanceled = true;
             SelectedTask = null;
             WorkingMode = WorkingMode.WorkingModeDefault;
             SelectedTaskGroup = null;
@@ -259,6 +217,8 @@ namespace ViewModel
         //private string _oldTaskGroup;
 
         private TaskGroup _oldSelectedGroup;
+        private bool _isShowCompleted;
+        private bool _isShowCanceled;
 
         public WorkingMode WorkingMode
         {
@@ -348,7 +308,34 @@ namespace ViewModel
 
         public bool IsGroupEditAvailable =>
             WorkingMode == WorkingMode.WorkingModeGroupView &&
-            !SelectedTaskGroup.IsAutoGroup; 
+            !SelectedTaskGroup.IsAutoGroup;
+
+
+        public bool IsShowCompleted
+        {
+            get { return _isShowCompleted; }
+            set
+            {
+                _isShowCompleted = value;
+                FilterFunction();
+                OnPropertyChanged(nameof(IsShowCompleted));
+                OnPropertyChanged(nameof(IsShowCanceled));
+            }
+        }
+
+        public bool IsShowCanceled
+        {
+            get { return _isShowCanceled; }
+            set
+            {
+                _isShowCanceled = value;
+                FilterFunction();
+                OnPropertyChanged(nameof(IsShowCanceled));
+                OnPropertyChanged(nameof(IsShowCompleted));
+            }
+        }
+
+
 
         public RelayCommand RelayCommandGroupCreate { get; set; }
         public RelayCommand RelayCommandGroupCreateSave { get; set; }
@@ -431,10 +418,37 @@ namespace ViewModel
             PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
         }
 
-        public void NewUserTasksCollection(string name)
+
+        public void FilterFunction()
         {
-            var newUserTasksCollection = new TaskGroup {GroupName = name};
-            SuperCollectionTasks.Add(newUserTasksCollection);
+            //ICollectionView groupsDataSourceView =
+            //    CollectionViewSource.GetDefaultView(SuperCollectionTasks);
+
+            foreach (TaskGroup taskGroup in SuperCollectionTasks)
+            {
+                ICollectionView userTaskDataSourceView = 
+                    CollectionViewSource.GetDefaultView(taskGroup.UserTasks);
+                if (IsShowCompleted && IsShowCanceled)
+                {
+                    userTaskDataSourceView.Filter = userTask => true;
+                }
+                if (IsShowCompleted && !IsShowCanceled)
+                {
+                    userTaskDataSourceView.Filter = userTask => 
+                        ((UserTask)userTask).Status != TaskStatus.Canceled;
+                }
+                if (!IsShowCompleted && IsShowCanceled)
+                {
+                    userTaskDataSourceView.Filter = userTask => 
+                        ((UserTask)userTask).Status != TaskStatus.Completed;
+                }
+                if (!IsShowCompleted && !IsShowCanceled)
+                {
+                    userTaskDataSourceView.Filter = userTask => 
+                        ((UserTask)userTask).Status != TaskStatus.Completed &&
+                        ((UserTask)userTask).Status != TaskStatus.Canceled;
+                }
+            }
 
         }
 
@@ -553,10 +567,15 @@ namespace ViewModel
         {
             _oldSelectedUserTask.Name = SelectedTask.Name;
             _oldSelectedUserTask.Description = SelectedTask.Description;
-            bool isDateChanged = _oldSelectedUserTask.DueDate.Day == SelectedTask.DueDate.Day;
+            bool isDateChanged = _oldSelectedUserTask.DueDate.Day != SelectedTask.DueDate.Day;
             if (isDateChanged)
             {
                 _oldSelectedUserTask.DueDate = SelectedTask.DueDate;
+            }
+            bool isTaskStatusChanged = _oldSelectedUserTask.Status != SelectedTask.Status;
+            if (isTaskStatusChanged)
+            {
+                _oldSelectedUserTask.Status = SelectedTask.Status;
             }
 
             _oldSelectedUserTask.Status = SelectedTask.Status;
@@ -567,6 +586,11 @@ namespace ViewModel
             {
                 AutoGroupDistribution(SelectedTask);
             }
+            if (isTaskStatusChanged)
+            {
+                FilterFunction();
+            }
+
             _oldSelectedUserTask = null;
             WorkingMode = WorkingMode.WorkingModeTaskVeiw;
         }
