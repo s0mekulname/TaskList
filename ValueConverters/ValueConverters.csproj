@@ -45,6 +45,7 @@
     <Compile Include="EnumConverter.cs" />
     <Compile Include="EnumDescriptionConverter.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="TaskStatusToStringConverter.cs" />
     <Compile Include="WorkingModeToStringConverter.cs" />
   </ItemGroup>
   <ItemGroup>

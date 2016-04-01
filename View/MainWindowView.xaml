@@ -10,11 +10,33 @@
         xmlns:model="clr-namespace:Model;assembly=Model"
         d:DataContext="{d:DesignInstance viewModel:MainWindowViewModel}"
         mc:Ignorable="d"
-        Title="{Binding WorkingMode,Converter={StaticResource Enum2Descr}}" Height="350" Width="525"
-        Icon="Images/blue_dot.png"
+        
+        Height="350" Width="525" Icon="Images/todo.png"
+        Title="Список задач" 
         >
+    
+    
     <Window.Resources>
-        <BooleanToVisibilityConverter x:Key="Bool2Vis"/>
+        <Style x:Key="TextBlockCaptionStyle" TargetType="TextBlock">
+            <Setter Property="FontWeight" Value="Bold"/>
+            <Setter Property="Padding" Value="1"/>
+            <Setter Property="Margin" Value="0 3 1 0"/>
+        </Style>
+
+        <Style TargetType="Button">
+            <Setter Property="Padding" Value="1"/>
+            <Setter Property="Margin" Value="1 3 1 3"/>
+        </Style>     
+        
+        <Style TargetType="CheckBox">
+            <Setter Property="Padding" Value="1"/>
+            <Setter Property="Margin" Value="1 2 1 1"/>
+        </Style>       
+        
+        <Style TargetType="Window">
+            <Setter Property="Padding" Value="1"/>
+            <Setter Property="Margin" Value="1 2 1 1"/>
+        </Style>           
         
     </Window.Resources>
     <Grid>
@@ -42,14 +64,23 @@
                         ItemsSource="{Binding UserTasks}"
                         
                         >
-                        
-                        <TextBlock Text="{Binding Path=GroupName}"/>
-                        
-                        <HierarchicalDataTemplate.ItemTemplate
-                            >
+                        <StackPanel Orientation="Horizontal"
+                                    Margin="0 1 1 1">
+                            <Image Source="Images/folder.png"
+                                   Height="21"/>
+                            <TextBlock Text="{Binding Path=GroupName}"
+                                       Margin="3 1 1 1"/>
+                        </StackPanel>
+                        <HierarchicalDataTemplate.ItemTemplate>
                             <DataTemplate
                                 DataType="{x:Type model:UserTask}">
-                                <TextBlock Text="{Binding  Path=Name}"/>
+                                <StackPanel Orientation="Horizontal"
+                                            Margin="2">
+                                    <Image Source="{Binding Path=Status, Converter={StaticResource Status2String}, Mode=OneWay}"
+                                           Height="9"/>
+                                    <TextBlock Text="{Binding  Path=Name}"
+                                               Margin="3 0 1 0"/>
+                                </StackPanel>
                             </DataTemplate>
                         </HierarchicalDataTemplate.ItemTemplate>
                        
@@ -96,17 +127,20 @@
             <StackPanel>
 
                 <TextBlock Text="Название задачи"
-                            IsEnabled="{Binding IsInModeTaskEditOrCreate}"/>
+                            IsEnabled="{Binding IsInModeTaskEditOrCreate}"
+                           Style="{StaticResource TextBlockCaptionStyle}"/>
                 <TextBox Text="{Binding SelectedTask.Name}"
                             IsEnabled="{Binding IsInModeTaskEditOrCreate}"/>
-                <TextBlock Text="Описание задачи"/>
+                <TextBlock Text="Описание задачи"
+                           Style="{StaticResource TextBlockCaptionStyle}"/>
                 <TextBox
                     IsEnabled="{Binding IsInModeTaskEditOrCreate}"
                     Text="{Binding SelectedTask.Description}"
                     AcceptsReturn="True"
                     TextWrapping="Wrap"
                     />
-                <TextBlock Text="Статус"/>
+                <TextBlock Text="Статус"
+                           Style="{StaticResource TextBlockCaptionStyle}"/>
                 <ComboBox
                     ItemsSource="{extensions:EnumValuesExtension {x:Type model:TaskStatus}}"
                     SelectedValuePath="EnumValue" DisplayMemberPath="DisplayString" 
@@ -114,7 +148,8 @@
                     IsEnabled="{Binding IsInModeTaskEditOrCreate}"
                     />
                 
-                <TextBlock Text="Планируемая дата завершения"/>
+                <TextBlock Text="Планируемая дата завершения"
+                           Style="{StaticResource TextBlockCaptionStyle}"/>
                 <DatePicker SelectedDate="{Binding  SelectedTask.DueDate}"
                             IsEnabled="{Binding IsInModeTaskEditOrCreate}"/>
                
@@ -168,7 +203,8 @@
             Grid.Row="0" Grid.Column="1"
             Visibility="{Binding IsUserTasksCollectionSelected, Converter={StaticResource Bool2Vis}}">
             <StackPanel x:Name="StackPanelWorkWithGroup">
-                <TextBlock Text="Название Группы"/>
+                <TextBlock Text="Название Группы"
+                           Style="{StaticResource TextBlockCaptionStyle}"/>
                 <TextBox Text="{Binding SelectedTaskGroup.GroupName,Mode=TwoWay}"
                          IsEnabled="{Binding IsInModeGroupEditOrCreate}"/>
                 
@@ -219,6 +255,10 @@
         </GroupBox>
     </Grid>
 </Window>
+
+
+
+
 
 
 
