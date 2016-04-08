@@ -1,15 +1,16 @@
-﻿using System;
-using System.Collections.Generic;
+﻿//  Конвертер для отображания значков рядом с задачами в дереве задач
+
+using System;
 using System.Globalization;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.Windows.Data;
-using Model;
+
+/* Без этого юзинга программа пытается использовать
+   одноимённый системный класс */
 using TaskStatus = Model.TaskStatus;
 
 namespace ValueConverters
 {
+//  Конвертер для отображания значков рядом с задачами в дереве задач
     public class TaskStatusToStringConverter: IValueConverter
     {
         private static string GetTaskStatusImage(TaskStatus taskStatus)
@@ -29,6 +30,7 @@ namespace ValueConverters
             return (string) GetTaskStatusImage((TaskStatus)value);
         }
 
+        // Обратное преобразование не нужно
         public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)
         {
             throw new Exception("Illegal string to task status conversion");

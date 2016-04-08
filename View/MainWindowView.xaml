@@ -3,19 +3,16 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-        xmlns:local="clr-namespace:View"
         xmlns:viewModel="clr-namespace:ViewModel;assembly=ViewModel"
         xmlns:extensions="clr-namespace:MarkupExtensions;assembly=MarkupExtensions"
-        xmlns:valueConverters="clr-namespace:ValueConverters;assembly=ValueConverters"
         xmlns:model="clr-namespace:Model;assembly=Model"
         d:DataContext="{d:DesignInstance viewModel:MainWindowViewModel}"
-        mc:Ignorable="d"
-        
+        mc:Ignorable="d"      
         Height="350" Width="525" Icon="Images/todo.png"
         Title="Список задач" 
         >
     
-    
+    <!-- Стили различных элементов в одном месте -->
     <Window.Resources>
         <Style x:Key="TextBlockCaptionStyle" TargetType="TextBlock">
             <Setter Property="FontWeight" Value="Bold"/>
@@ -25,45 +22,51 @@
 
         <Style TargetType="Button">
             <Setter Property="Padding" Value="1"/>
-            <Setter Property="Margin" Value="1 3 1 3"/>
+            <Setter Property="Margin" Value="1 2 1 1"/>
         </Style>     
         
         <Style TargetType="CheckBox">
             <Setter Property="Padding" Value="1"/>
             <Setter Property="Margin" Value="1 2 1 1"/>
-        </Style>       
-        
-        <Style TargetType="Window">
-            <Setter Property="Padding" Value="1"/>
-            <Setter Property="Margin" Value="1 2 1 1"/>
-        </Style>           
-        
+        </Style>                         
     </Window.Resources>
+    
+    <!-- Главный грид -->
     <Grid>
         <Grid.ColumnDefinitions>
             <ColumnDefinition></ColumnDefinition>
             <ColumnDefinition></ColumnDefinition>
         </Grid.ColumnDefinitions>
 
-        <DockPanel
-            Grid.Row="0" Grid.Column="0"
-             >
+        <!-- Грид левой части окна -->
+        <Grid Grid.Row="0" Grid.Column="0">
 
-
+            <Grid.RowDefinitions>
+                
+                <!--Тривью занимает всё оставшееся от групбокса место-->
+                <RowDefinition Height="*"/>
+                
+                <!--Групбокс "действия" занимает место в соответствии со своим 
+                размером -->
+                <RowDefinition Height="Auto"/>
+                
+            </Grid.RowDefinitions>
+                     
             <TreeView x:Name="TreeViewTasks"
-                      DockPanel.Dock="Top"
                       Margin ="5" 
-                      
+                      Grid.Row="0"
                       ItemsSource="{Binding Path=SuperCollectionTasks}"
                       SelectedItemChanged="TreeViewTasks_OnSelectedItemChanged"
-                      IsEnabled="{Binding IsNotInEditingOrCreating}"
+                      IsEnabled="{Binding IsNotInEditingOrCreating}"        
                       >
                 <TreeView.ItemTemplate>
+                    <!--Шаблон данных первого уровня иерархический-->
                     <HierarchicalDataTemplate 
                         DataType="{x:Type viewModel:TaskGroup}"
-                        ItemsSource="{Binding UserTasks}"
-                        
+                        ItemsSource="{Binding UserTasks}"                       
                         >
+                        <!--Каждый элемент тривью первого уровня есть стек-панель 
+                        с названием группы и иконкой с папкой слева-->
                         <StackPanel Orientation="Horizontal"
                                     Margin="0 1 1 1">
                             <Image Source="Images/folder.png"
@@ -71,9 +74,14 @@
                             <TextBlock Text="{Binding Path=GroupName}"
                                        Margin="3 1 1 1"/>
                         </StackPanel>
+                        
                         <HierarchicalDataTemplate.ItemTemplate>
+                            <!--Шаблон данных второго уровня не иерархический
+                            так как в тривью всего два уровня-->
                             <DataTemplate
                                 DataType="{x:Type model:UserTask}">
+                                <!--Каждый элемент тривью первого уровня есть стек-панель 
+                                с названием группы и иконкой с папкой слева-->
                                 <StackPanel Orientation="Horizontal"
                                             Margin="2">
                                     <Image Source="{Binding Path=Status, Converter={StaticResource Status2String}, Mode=OneWay}"
@@ -81,6 +89,7 @@
                                     <TextBlock Text="{Binding  Path=Name}"
                                                Margin="3 0 1 0"/>
                                 </StackPanel>
+                                
                             </DataTemplate>
                         </HierarchicalDataTemplate.ItemTemplate>
                        
@@ -90,6 +99,7 @@
                 
             <!-- Групбокс Действия -->
             <GroupBox x:Name="GroupBoxActions"
+                      Grid.Row="1"
                       Header="Действия"
                       DockPanel.Dock="Bottom"
                       Height="auto" VerticalAlignment="Bottom"
@@ -116,8 +126,12 @@
                 </StackPanel>
             </GroupBox>
 
-        </DockPanel>
+        </Grid>
 
+        <TextBlock Text="Выберите элемент из дерева задач"
+                   Grid.Row="0" Grid.Column="1"
+                   Visibility="{Binding IsInDefaultMode, Converter={StaticResource Bool2Vis}}"/>
+        
         <!-- Групбокс Выбранная задача -->
         <GroupBox x:Name="GroupBoxSelectedTask"
             Header="Выбранная задача"
@@ -177,19 +191,27 @@
                 <StackPanel x:Name="StackPanelGrouзEdit"
                             Orientation="Vertical"
                             Visibility="{Binding IsInModeTaskViewOrEdit, Converter={StaticResource Bool2Vis}}"
+                            Margin="0 2 0 1"
                             >
                     <Button x:Name="ButtonTaskEdit"
                         Content="Редактировать"
                         Command="{Binding RelayCommandTaskEdit}"/>
-                    <StackPanel
-                        Orientation="Horizontal">
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition/>
+                            <ColumnDefinition/>
+                        </Grid.ColumnDefinitions>
                         <Button x:Name="ButtonTaskEditSave"
+                                Grid.Column="0"                                
                                 Content="Сохранить"
-                                Command="{Binding RelayCommandTaskEditSave}"/>
+                                Command="{Binding RelayCommandTaskEditSave}"
+                                />
                         <Button x:Name="ButtonTaskEditCancel"
+                                Grid.Column="1"     
                                 Content="Отменить"
-                                Command="{Binding RelayCommandTaskEditCancel}"/>
-                    </StackPanel>
+                                Command="{Binding RelayCommandTaskEditCancel}"
+                                />
+                    </Grid>
                 </StackPanel>
 
             </StackPanel>
@@ -199,7 +221,7 @@
 
         <!-- Групбокс Выбранная группа -->
         <GroupBox x:Name="GroupBoxSelectedGroup"
-            Header="Выбранная задача"
+            Header="Выбранная группа"
             Grid.Row="0" Grid.Column="1"
             Visibility="{Binding IsUserTasksCollectionSelected, Converter={StaticResource Bool2Vis}}">
             <StackPanel x:Name="StackPanelWorkWithGroup">
@@ -211,19 +233,25 @@
                 <!-- Стек-панель с кнопками "редактировать, сохранить, отмена" для новой группы -->
                 <StackPanel x:Name="StackPanelGroupGreate"
                     Orientation="Vertical"
-                    Visibility="{Binding IsInModeGroupCreate, Converter={StaticResource Bool2Vis}}">
+                    Visibility="{Binding IsInModeGroupCreate, Converter={StaticResource Bool2Vis}}"
+                           Margin="0 2 0 1" >
                     <Button Content="Редактировать"
                             IsEnabled="False"
                             />
-                    <StackPanel               
-                        Orientation="Horizontal">
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition/>
+                            <ColumnDefinition/>
+                        </Grid.ColumnDefinitions>
                         <Button x:Name="ButtoGroupCreationSave"
+                                Grid.Column="0"
                                 Content="Сохранить"
                                 Command="{Binding RelayCommandGroupCreateSave}"/>
                         <Button x:Name="ButtonGroupCreationCancel"
+                                Grid.Column="1"
                                 Content="Отменить"
                                 Command="{Binding RelayCommandGroupCreateCancel}"/>
-                    </StackPanel>
+                    </Grid>
 
                 </StackPanel>
                 
@@ -255,6 +283,14 @@
         </GroupBox>
     </Grid>
 </Window>
+
+
+
+
+
+
+
+
 
 
 

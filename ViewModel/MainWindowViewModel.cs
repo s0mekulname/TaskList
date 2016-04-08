@@ -37,46 +37,228 @@ namespace ViewModel
             {
                 UserTasks = new ObservableCollection<UserTask>
                 {
+
+                    // Новые задачи
                     new UserTask
                     {
-                        Name = "New Task 1",
-                        Description = "Description 1",
-                        DueDate = Convert.ToDateTime("2016-04-1"),
+                        Name = "Новая задача 1",
+                        Description = "Новая задача 1 должна быть " +
+                                      "выполнена до 1 декабря 2016 года",
+                        DueDate = Convert.ToDateTime("2016-12-1"),
                         Status = TaskStatus.New,
                         Group = "Default"
                     },
+
                     new UserTask
                     {
-                        Name = "Postponded Task 2",
-                        Description = "Description 2",
-                        DueDate = Convert.ToDateTime("2015-01-01"),
-                        Status = TaskStatus.Postponded,
+                        Name = "Новая задача 3 Истекает завтра",
+                        Description = "Новая задача 3 должна быть " +
+                                      "выполнена до завтра",
+                        DueDate = DateTime.Today.AddDays(1),
+                        Status = TaskStatus.New,
                         Group = "Default"
                     },
+
                     new UserTask
                     {
-                        Name = "In Progress Task 4",
-                        Description = "Description 1",
-                        DueDate = Convert.ToDateTime("2016-05-03"),
+                        Name = "Новая задача 4 Истекает сегодня",
+                        Description = "Новая задача 4 должна быть " +
+                                      "выполнена сегодня",
+                        DueDate = DateTime.Today,
+                        Status = TaskStatus.New,
+                        Group = "Default"
+                    },
+
+                    new UserTask
+                    {
+                        Name = "Новая задача 5 сразу просрочена",
+                        Description = "Новая задача 5 " +
+                                      "просрочена ещё вчера",
+                        DueDate = DateTime.Today.AddDays(-1),
+                        Status = TaskStatus.New,
+                        Group = "Default"
+                    },
+
+                    // Выполняющиеся задачи
+                    new UserTask
+                    {
+                        Name = "Выполняющаяся задача 1",
+                        Description = "Выполняющаяся задача 1 должна быть " +
+                                      "выполнена до 1 декабря 2016 года" +
+                                      "и всё ещё выполняется",
+                        DueDate = Convert.ToDateTime("2016-12-1"),
                         Status = TaskStatus.InProgress,
                         Group = "Default"
                     },
+
                     new UserTask
                     {
-                        Name = "Completed Task 5",
-                        Description = "Description 1",
-                        DueDate = Convert.ToDateTime("2016-03-1"),
+                        Name = "Выполняющаяся задача 3 Истекает завтра",
+                        Description = "Выполняющаяся задача 3 должна быть " +
+                                      "выполнена до завтра" +
+                                      "и всё ещё выполняется",
+                        DueDate = DateTime.Today.AddDays(1),
+                        Status = TaskStatus.InProgress,
+                        Group = "Default"
+                    },
+
+                    new UserTask
+                    {
+                        Name = "Выполняющаяся задача 4 Истекает сегодня",
+                        Description = "Выполняющаяся задача 4 должна быть " +
+                                      "выполнена сегодня" +
+                                      "и всё ещё выполняется",
+                        DueDate = DateTime.Today,
+                        Status = TaskStatus.InProgress,
+                        Group = "Default"
+                    },
+
+                    new UserTask
+                    {
+                        Name = "Выполняющаяся задача 5 сразу просрочена",
+                        Description = "Выполняющаяся задача 5 " +
+                                      "просрочена ещё вчера" +
+                                      "и всё ещё выполняется",
+                        DueDate = DateTime.Today.AddDays(-1),
+                        Status = TaskStatus.InProgress,
+                        Group = "Default"
+                    },
+
+
+
+                    // Отложенные задачи
+                    new UserTask
+                    {
+                        Name = "Отложенная задача 1",
+                        Description = "Отложенная задача 1 должна быть " +
+                                      "выполнена до 1 декабря 2016 года" +
+                                      "но пока отложена",
+                        DueDate = Convert.ToDateTime("2016-12-1"),
+                        Status = TaskStatus.Postponded,
+                        Group = "Default"
+                    },
+
+                    new UserTask
+                    {
+                        Name = "Отложенная задача 3 Истекает завтра",
+                        Description = "Отложенная задача 3 должна быть " +
+                                      "выполнена до завтра" +
+                                      "но пока отложена",
+                        DueDate = DateTime.Today.AddDays(1),
+                        Status = TaskStatus.Postponded,
+                        Group = "Default"
+                    },
+
+                    new UserTask
+                    {
+                        Name = "Отложенная задача 4 Истекает сегодня",
+                        Description = "Отложенная задача 4 должна быть " +
+                                      "выполнена сегодня" +
+                                      "но пока отложена",
+                        DueDate = DateTime.Today,
+                        Status = TaskStatus.Postponded,
+                        Group = "Default"
+                    },
+
+                    new UserTask
+                    {
+                        Name = "Отложенная задача 5 сразу просрочена",
+                        Description = "Отложенная задача 5 " +
+                                      "должна была быть выполнена ещё вчера" +
+                                      "но была отложена и до сих пор не выполнена",
+                        DueDate = DateTime.Today.AddDays(-1),
+                        Status = TaskStatus.Postponded,
+                        Group = "Default"
+                    },                    
+                    
+                    // Завершенные задачи
+                    new UserTask
+                    {
+                        Name = "Завершённая задача 1 уже выполнена",
+                        Description = "Завершённая задача 1 должна была быть " +
+                                      "выполнена до 1 декабря 2016 года и уже выполнена",
+                        DueDate = Convert.ToDateTime("2016-12-1"),
                         Status = TaskStatus.Completed,
                         Group = "Default"
                     },
+
                     new UserTask
                     {
-                        Name = "Canceled Task 6",
-                        Description = "Description 1",
-                        DueDate = Convert.ToDateTime("2017-03-30"),
+                        Name = "Завершённая задача 3 Истекает завтра",
+                        Description = "Завершённая задача 3 должна была быть " +
+                                      "выполнена до завтра и уже выполнена",
+                        DueDate = DateTime.Today.AddDays(1),
+                        Status = TaskStatus.Completed,
+                        Group = "Default"
+                    },
+
+                    new UserTask
+                    {
+                        Name = "Завершённая задача 4 Истекает сегодня",
+                        Description = "Завершённая задача 4 должна была быть " +
+                                      "выполнена сегодня и она уже выполнена",
+                        DueDate = DateTime.Today,
+                        Status = TaskStatus.Completed,
+                        Group = "Default"
+                    },
+
+                    new UserTask
+                    {
+                        Name = "Завершённая задача 5  просрочена",
+                        Description = "Завершённая задача 5 " +
+                                      "должна была быть выполнена ещё позавчера " +
+                                      "но была выполнена позже (вчера)",
+                        DueDate = DateTime.Today.AddDays(-2),
+                        Status = TaskStatus.Completed,
+                        Group = "Default"
+                    },
+
+                    // Отменённые задачи
+                    new UserTask
+                    {
+                        Name = "Отменённая задача 1 истекает в будущем",
+                        Description = "Отменённая задача 1 должна была быть " +
+                                      "выполнена до 1 декабря 2016 года " +
+                                      "но была досрочно отменена",
+                        DueDate = Convert.ToDateTime("2016-12-1"),
                         Status = TaskStatus.Canceled,
                         Group = "Default"
-                    }
+                    },
+
+                    new UserTask
+                    {
+                        Name = "Отменённая задача 3 Истекает завтра",
+                        Description = "Отменённая задача 3 должна была быть " +
+                                      "выполнена до завтра " +
+                                      "но была досрочно отменена",
+                        DueDate = DateTime.Today.AddDays(1),
+                        Status = TaskStatus.Canceled,
+                        Group = "Default"
+                    },
+
+                    new UserTask
+                    {
+                        Name = "Отменённая задача 4 Истекает сегодня",
+                        Description = "Отменённая задача 4 должна была быть " +
+                                      "выполнена сегодня "+
+                                      "но была досрочно отменена",
+                        DueDate = DateTime.Today,
+                        Status = TaskStatus.Canceled,
+                        Group = "Default"
+                    },
+
+                    new UserTask
+                    {
+                        Name = "Отменённая задача 5",
+                        Description = "Отменённая задача 5 " +
+                                      "должна была быть выполнена ещё вчера " +
+                                      "но была досрочно отменена (позавчера)",
+                        DueDate = DateTime.Today.AddDays(-1),
+                        Status = TaskStatus.Canceled,
+                        Group = "Default"
+                    },
+
+
                 },
                 IsAutoGroup = false,
                 GroupName = "All"
@@ -421,9 +603,7 @@ namespace ViewModel
 
         public void FilterFunction()
         {
-            //ICollectionView groupsDataSourceView =
-            //    CollectionViewSource.GetDefaultView(SuperCollectionTasks);
-
+            if (SuperCollectionTasks == null) return;
             foreach (TaskGroup taskGroup in SuperCollectionTasks)
             {
                 ICollectionView userTaskDataSourceView = 
@@ -588,6 +768,7 @@ namespace ViewModel
             }
             if (isTaskStatusChanged)
             {
+                AutoGroupDistribution(SelectedTask);
                 FilterFunction();
             }
 
@@ -599,7 +780,7 @@ namespace ViewModel
         {
             var dueDate = userTask.DueDate;
             var status = userTask.Status;
-            var delta = dueDate.Day - DateTime.Today.Day;
+            var delta = (dueDate - DateTime.Today).Days;
 
             bool isExpired =
                 status != TaskStatus.Canceled &&
@@ -628,7 +809,8 @@ namespace ViewModel
             {
                 ExpireTomorrowTasks.UserTasks.Remove(userTask);
             }
+       //     FilterFunction();
 
         }
-    }
+}
 }
