@@ -1,3 +1,7 @@
+//Author: Josh Smith
+//Version: 1.0.2
+//https://www.nuget.org/packages/RelayCommand/1.0.2/
+
 using System;
 using System.Diagnostics;
 using System.Windows.Input;

@@ -6,17 +6,24 @@ using ViewModel.Annotations;
 
 namespace ViewModel
 {
+    // √руппа задач
     public class TaskGroup : INotifyPropertyChanged
     {
-        private string _groupName;
-        private ObservableCollection<UserTask> _userTasks;
-
         public TaskGroup()
         {
             IsAutoGroup = false;
         }
 
+        // »м€ группы
+        private string _groupName;
+
+        // —писок задач
+        private ObservableCollection<UserTask> _userTasks;
+
+        // явл€етс€ ли группа автогруппой
         public bool IsAutoGroup { get; set; }
+
+        // 
         public ObservableCollection<UserTask> UserTasks
         {
             get
@@ -30,7 +37,9 @@ namespace ViewModel
                 OnPropertyChanged(nameof(UserTasks));
             }
         }
-
+        
+        // ќбновление имени группы дл€ всех
+        // задач, вход€щих в группу
         private void GroupNameUpdate()
         {
             if (UserTasks != null)

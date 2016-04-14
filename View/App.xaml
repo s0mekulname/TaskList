@@ -5,7 +5,7 @@
              xmlns:valueConverters="clr-namespace:ValueConverters;assembly=ValueConverters"
              StartupUri="MainWindowView.xaml">
     <Application.Resources>
-        <valueConverters:EnumDescriptionConverter x:Key="Enum2Descr"/>
+        <!--<valueConverters:EnumDescriptionConverter x:Key="Enum2Descr"/>-->
         <BooleanToVisibilityConverter x:Key="Bool2Vis"/>
         <valueConverters:TaskStatusToStringConverter x:Key="Status2String"/>
     </Application.Resources>

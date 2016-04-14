@@ -11,17 +11,32 @@ namespace ViewModel
 {
     public class MainWindowViewModel : INotifyPropertyChanged
     {
+        // Выбранная задача.
         private UserTask _selectedTask;
+
+        // Выбранная группа.
         private TaskGroup _selectedTaskGroup;
+
+        // Флаг, выбрана ли задача
         private bool _isUserTaskSelected;
+
+        // Флаг, выбрана ли группа.
         private bool _isUserTasksCollectionSelected;
+
+        // Текущий режим работы (перечисление).
         private WorkingMode _workingMode;
+
+        // Все группы.
         public TaskGroup AllUserTasks { get; set; }
 
+        // Просроченные задачи.
         public TaskGroup ExpiredTasks { get; set; }
 
+        // Задачи, время выполнения которых истечёт завтра.
         public TaskGroup ExpireTomorrowTasks { get; set; }
 
+        // Группа по умолчания, где находятся пользовательские
+        // задачи при старте приложения.
         public TaskGroup DefaultTasks { get; set; }
 
         // Иерархическая коллекция всех групп
@@ -30,9 +45,9 @@ namespace ViewModel
         public MainWindowViewModel()
         {
          
-
+            // Инициализация задач.
             #region UserTasks Initialization 2
-
+            
             AllUserTasks = new TaskGroup
             {
                 UserTasks = new ObservableCollection<UserTask>
@@ -266,18 +281,21 @@ namespace ViewModel
 
             #endregion
 
+            // Создание группы просроченных задач.
             ExpiredTasks = new TaskGroup()
             {
                 GroupName = "Expired",
                 IsAutoGroup = true
             };
 
+            // Создание группы задач, которые будут просрочены завтра
             ExpireTomorrowTasks = new TaskGroup()
             {
                 GroupName = "Expire Tomorrow",
                 IsAutoGroup = true
             };
 
+            // Создание группы задач по умолчанию.
             DefaultTasks = new TaskGroup()
             {
                 GroupName = "Default",
@@ -286,35 +304,44 @@ namespace ViewModel
             };
 
             // Добавляем элемнты из UserTasks в DefaultTasks
-            // TODO: (Должно быть лучшее решение для копирования)
             foreach (var u in AllUserTasks.UserTasks)
             {
                 DefaultTasks.UserTasks.Add(u);
                 AutoGroupDistribution(u);
             }
 
+            // Коллекция всех групп.
             SuperCollectionTasks = new ObservableCollection<TaskGroup>
             {
-                ExpiredTasks,
-                ExpireTomorrowTasks,
-                DefaultTasks
-
+                ExpiredTasks,           // Просроченные.
+                ExpireTomorrowTasks,    // Будут просрочены завтра.
+                DefaultTasks            // Группа по умолчанию.
             };
 
+            // Флаг для чекбокса "Показать завершённые".
             IsShowCompleted = true;
+
+            // Флаг для чекбокса "Показать отменённые".
             IsShowCanceled = true;
+
+            // При старте приложения никаких задач не выбрано.
             SelectedTask = null;
+
+            // Режим работы "Ничего не выбрано".
             WorkingMode = WorkingMode.WorkingModeDefault;
+
+            // При старте приложения никакая группа не выбрана.
             SelectedTaskGroup = null;
+
+            // При старте приложения никаких задач не выбрано.
             IsUserTaskSelected = false;
+
+            // При старте приложения никакая группа не выбрана.
             IsUserTasksCollectionSelected = false;
 
+            // Инициализация старых группы и задачи.
             _oldSelectedGroup = null;
             _oldSelectedUserTask = null;
-
-            // Поле для хранения старого значения
-            // имени группы (нужно для команды редактирования)
-            //_oldGroupName = "";
 
             // Создать новую группу
             // Создать группу можно, если не включен режим 
@@ -381,27 +408,21 @@ namespace ViewModel
             RelayCommandTaskEditSave =
                 new RelayCommand(TaskEditSave, param => IsInModeTaskEdit);
 
-
-
-
-
-            //IsWorkingWithSelectedTask = false;
         }
 
-        //private string _oldGroupName;
-
+        // Предыдущая выбранная задача.
         private UserTask _oldSelectedUserTask;
 
-        //private string _oldTaskName;
-        //private string _oldTaskDescription;
-        //private DateTime _oldTaskDueDate;
-        //private Model.TaskStatus _oldTaskStatus;
-        //private string _oldTaskGroup;
-
+        // Предыдущая выбранная группа.
         private TaskGroup _oldSelectedGroup;
+
+        // Показывать завершённые.
         private bool _isShowCompleted;
+
+        // Показывать отменённые.
         private bool _isShowCanceled;
 
+        // Режим работы приложения.
         public WorkingMode WorkingMode
         {
             get { return _workingMode; }
@@ -430,6 +451,7 @@ namespace ViewModel
                 OnPropertyChanged(nameof(IsGroupEditAvailable));
             }
         }
+        // Вычисляемые свойства.
 
         public bool IsInDefaultMode => 
             WorkingMode == WorkingMode.WorkingModeDefault;
@@ -517,7 +539,7 @@ namespace ViewModel
             }
         }
 
-
+        // RelayCommand'ы
 
         public RelayCommand RelayCommandGroupCreate { get; set; }
         public RelayCommand RelayCommandGroupCreateSave { get; set; }
@@ -581,7 +603,6 @@ namespace ViewModel
             set
             {
                 _isUserTasksCollectionSelected = value;
-                //  IsUserTaskSelected = !value;
                 if (value)
                 {
                     IsUserTaskSelected = false;
@@ -600,7 +621,8 @@ namespace ViewModel
             PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
         }
 
-
+        // Фильтрация дерева задач в зависимости от состояния флажков
+        // "Скрывать завершённые" и "Скрывать отменённые".
         public void FilterFunction()
         {
             if (SuperCollectionTasks == null) return;
@@ -633,10 +655,8 @@ namespace ViewModel
         }
 
         // Создание группы
-
         public void GroupCreate(object obj)
-        {
-            
+        {           
             var newGroup = new TaskGroup
             {
                 GroupName = "Новая Группа",
@@ -689,6 +709,8 @@ namespace ViewModel
             WorkingMode = WorkingMode.WorkingModeGroupView;
         }
 
+        // Создание задачи.
+
         public void TaskCreate(object obj)
         {
             var newUserTask = new UserTask
@@ -696,7 +718,7 @@ namespace ViewModel
                 Name = "Новая задача",
                 Description = "Добавьте описание",
                 DueDate = DateTime.Today.AddDays(1),
-                Status = Model.TaskStatus.New,
+                Status = TaskStatus.New,
                 Group = SelectedTaskGroup.GroupName
             };
 
@@ -717,10 +739,15 @@ namespace ViewModel
             WorkingMode = WorkingMode.WorkingModeGroupView;
         }
 
+        // Редактирование задачи.
+
         public void TaskEdit(object obj)
         {
+            // Запоминание изначального состояния выбранной задачи.
             _oldSelectedUserTask = SelectedTask;
 
+            // Редактироваться будет новая задача
+            // чтобы можно было откатить изменения.
             var tempTask = new UserTask
             {
                 Name = _oldSelectedUserTask.Name,
@@ -730,35 +757,40 @@ namespace ViewModel
                 Group = _oldSelectedUserTask.Group
             };
 
+            // Новая задача получает фокус.
             SelectedTask = tempTask;
-
-
             WorkingMode = WorkingMode.WorkingModeTaskEdit;
         }
 
+        // Отмена редактирования задачи.
         public void TaskEditCancel(object obj)
         {
+            // Возвращаем задачу к исходному состоянию.
             SelectedTask = _oldSelectedUserTask;
             _oldSelectedUserTask = null;
             WorkingMode = WorkingMode.WorkingModeTaskVeiw;
         }
 
+        // Запись изменений в режиме редактирования.
         public void TaskEditSave(object obj)
         {
             _oldSelectedUserTask.Name = SelectedTask.Name;
             _oldSelectedUserTask.Description = SelectedTask.Description;
+
+            // Проверка изменил ли пользователь дату.
             bool isDateChanged = _oldSelectedUserTask.DueDate.Day != SelectedTask.DueDate.Day;
             if (isDateChanged)
             {
                 _oldSelectedUserTask.DueDate = SelectedTask.DueDate;
             }
+
+            // Проверка изменил ли пользователь статус.
             bool isTaskStatusChanged = _oldSelectedUserTask.Status != SelectedTask.Status;
             if (isTaskStatusChanged)
             {
                 _oldSelectedUserTask.Status = SelectedTask.Status;
             }
 
-            _oldSelectedUserTask.Status = SelectedTask.Status;
             _oldSelectedUserTask.Group = SelectedTask.Group;
 
             SelectedTask = _oldSelectedUserTask;
@@ -766,6 +798,9 @@ namespace ViewModel
             {
                 AutoGroupDistribution(SelectedTask);
             }
+
+            // Если изменился статус, то нужно сразу же отобразить
+            // изменения в дереве.
             if (isTaskStatusChanged)
             {
                 AutoGroupDistribution(SelectedTask);
@@ -776,7 +811,8 @@ namespace ViewModel
             WorkingMode = WorkingMode.WorkingModeTaskVeiw;
         }
 
-        public void AutoGroupDistribution(UserTask userTask)
+        // Распределения задачи по автогруппам.
+        private void AutoGroupDistribution(UserTask userTask)
         {
             var dueDate = userTask.DueDate;
             var status = userTask.Status;
@@ -791,6 +827,7 @@ namespace ViewModel
             {
                 ExpiredTasks.UserTasks.Add(userTask);
             }
+
             else if (ExpiredTasks.UserTasks.Contains(userTask))
             {
                 ExpiredTasks.UserTasks.Remove(userTask);
@@ -809,7 +846,6 @@ namespace ViewModel
             {
                 ExpireTomorrowTasks.UserTasks.Remove(userTask);
             }
-       //     FilterFunction();
 
         }
 }
