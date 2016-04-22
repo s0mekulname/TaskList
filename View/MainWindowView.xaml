@@ -172,18 +172,28 @@
                 <StackPanel x:Name="StackPanelGroupCreate"
                     Orientation="Vertical"
                             Visibility="{Binding IsInModeTaskCreate, Converter={StaticResource Bool2Vis}}">
-                    <Button 
-                        Content="Редактировать"
-                        IsEnabled="False"/>
-                    <StackPanel
-                        Orientation="Horizontal">
+                    <Grid>
+                        <Grid.RowDefinitions>
+                            <RowDefinition/>
+                            <RowDefinition/>
+                        </Grid.RowDefinitions>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition/>
+                            <ColumnDefinition/>
+                        </Grid.ColumnDefinitions>
+                        <Button Grid.RowSpan="2" Grid.Column="0"
+                                Content="Редактировать"
+                                IsEnabled="False"/>
+                                
                         <Button x:Name="ButtonTaskCreateSave"
+                                Grid.Row="0" Grid.Column="1"
                                 Content="Сохранить"
                                 Command="{Binding RelayCommandTaskCreateSave}"/>
                         <Button x:Name="ButtonTaskCreateCancel"
+                                Grid.Row="1" Grid.Column="1"
                                 Content="Отменить"
                                 Command="{Binding RelayCommandTaskCreateCancel}"/>
-                    </StackPanel>
+                   </Grid>
                 </StackPanel>
 
                 <!-- Стек-панель с кнопками "редактировать, сохранить, отмена" для
@@ -264,17 +274,22 @@
                             Content="Редактировать"
                             Command="{Binding RelayCommandGroupEdit}"                            
                             />
-                    
-                    <StackPanel Orientation="Horizontal">
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition/>
+                            <ColumnDefinition/>
+                        </Grid.ColumnDefinitions>
                         <Button x:Name="ButtonGroupEditSave"
+                                Grid.Column="0"
                                 Content="Сохранить"
                                 Command="{Binding RelayCommandGroupEditSave}"                                                     
                                />                          
                         <Button x:Name="ButtonGroupEditingCancel"
+                                Grid.Column="1"
                                 Content="Отменить"
                                 Command="{Binding RelayCommandGroupEditCancel}"
                                 />
-                    </StackPanel>
+                    </Grid>
 
                 </StackPanel>
             

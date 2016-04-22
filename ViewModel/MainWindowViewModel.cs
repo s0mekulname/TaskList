@@ -284,21 +284,21 @@ namespace ViewModel
             // Создание группы просроченных задач.
             ExpiredTasks = new TaskGroup()
             {
-                GroupName = "Expired",
+                GroupName = "Просроченные",
                 IsAutoGroup = true
             };
 
             // Создание группы задач, которые будут просрочены завтра
             ExpireTomorrowTasks = new TaskGroup()
             {
-                GroupName = "Expire Tomorrow",
+                GroupName = "Истекают завтра",
                 IsAutoGroup = true
             };
 
             // Создание группы задач по умолчанию.
             DefaultTasks = new TaskGroup()
             {
-                GroupName = "Default",
+                GroupName = "Мои задачи",
                 IsAutoGroup = false
 
             };
